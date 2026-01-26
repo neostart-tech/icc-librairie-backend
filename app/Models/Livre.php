@@ -15,4 +15,14 @@ class Livre extends Model
     {
         return $this->belongsTo(Categorie::class);
     }
+
+    public function stock()
+    {
+        return $this->hasOne(Stock::class);
+    }
+
+    public function stockMouvements()
+    {
+        return $this->hasMany(StockMouvement::class);
+    }
 }

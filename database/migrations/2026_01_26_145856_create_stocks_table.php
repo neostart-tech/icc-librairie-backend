@@ -10,14 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('livres', function (Blueprint $table) {
+        Schema::create('stocks', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('titre');
-            $table->string('auteur')->nullable();
-            $table->string('description')->nullable();
-            $table->integer('prix');
-            $table->integer('prix_promo')->nullable();
-            $table->foreignUuid('categorie_id')->references('id')->on('categories');
+            $table->integer('quantite');
+            $table->foreignUuid('livre_id')->constrained('livres');
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('livres');
+        Schema::dropIfExists('stocks');
     }
 };

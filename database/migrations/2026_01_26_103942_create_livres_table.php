@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('auteur')->nullable();
             $table->string('description')->nullable();
             $table->integer('prix');
+            $table->integer('prix_promo')->nullable();
             $table->foreignUuid('categorie_id')->references('id')->on('categories');
             $table->timestamps();
         });

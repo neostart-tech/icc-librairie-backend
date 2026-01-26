@@ -9,7 +9,7 @@ class Livre extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['titre', 'auteur', 'description', 'categorie_id', 'prix'];
+    protected $fillable = ['titre', 'auteur', 'description', 'prix', 'prix_promo', 'categorie_id'];
 
     public function categorie()
     {

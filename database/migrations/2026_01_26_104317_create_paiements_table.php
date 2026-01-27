@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->string('moyen_paiement');
             $table->string('reference_transaction')->unique();
+            $table->integer('montant');
             $table->enum('statut', ['success', 'pending', 'failed']);
             $table->foreignUuid('commande_id')->constrained('commandes');
             $table->timestamps();

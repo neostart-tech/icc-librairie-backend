@@ -8,6 +8,7 @@ use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\profil\ProfilController;
 use App\Http\Controllers\stocks\StockController;
 use App\Http\Middleware\IsAdminOrSuperAdmin;
+use App\Http\Middleware\IsSuperAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('/stocks')->group(function () {
         Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
         Route::post('/mouvement', [StockController::class, 'store']);
-    });
+    })->middleware(IsAdminOrSuperAdmin::class);
 
     // Profil
     Route::prefix('/profil')->group(function () {
@@ -79,12 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestion des utilisateurs et administrateurs
     Route::prefix('/admins')->group(function () {
-        Route::get('/', [UtilisateurController::class, 'index']);
-        Route::get('/all-users', [UtilisateurController::class, 'allUsers']);// Admins et superadmins
-        Route::post('/', [UtilisateurController::class, 'store']);
-        Route::get('/{user}', [UtilisateurController::class, 'show']);
-        Route::put('/{user}', [UtilisateurController::class, 'update']);
-        Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
-    });
 
+        Route::middleware(IsSuperAdmin::class)->group(function () {
+            Route::get('/', [UtilisateurController::class, 'index']);
+            Route::post('/', [UtilisateurController::class, 'store']);
+            Route::get('/{user}', [UtilisateurController::class, 'show']);
+            Route::put('/{user}', [UtilisateurController::class, 'update']);
+            Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
+        });
+        Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
+
+    });
 });

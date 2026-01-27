@@ -18,6 +18,7 @@ class PaiementResource extends JsonResource
             'id' => $this->id,
             'moyen_paiement' => $this->moyen_paiement,
             'reference_transaction' => $this->reference_transaction,
+            'montant' => $this->montant,
             'statut' => $this->statut,
             'commande_id' => $this->commande_id,
             'created_at' => $this->created_at,

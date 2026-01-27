@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\UtilisateurController;
 use App\Http\Controllers\auth\AdminAuthController;
 use App\Http\Controllers\auth\UserAuthController;
 use App\Http\Controllers\categories\CategorieController;
@@ -74,6 +75,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', [ProfilController::class, 'update']);
         Route::put('/password', [ProfilController::class, 'updatePassword']);
         Route::delete('/', [ProfilController::class, 'destroy']);
+    });
+
+    // Gestion des utilisateurs et administrateurs
+    Route::prefix('/admins')->group(function () {
+        Route::get('/', [UtilisateurController::class, 'index']);
+        Route::get('/all-users', [UtilisateurController::class, 'allUsers']);// Admins et superadmins
+        Route::post('/', [UtilisateurController::class, 'store']);
+        Route::get('/{user}', [UtilisateurController::class, 'show']);
+        Route::put('/{user}', [UtilisateurController::class, 'update']);
+        Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
     });
 
 });

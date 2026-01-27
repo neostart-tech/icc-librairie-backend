@@ -25,4 +25,9 @@ class Livre extends Model
     {
         return $this->hasMany(StockMouvement::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class);
+    }
 }

@@ -26,6 +26,7 @@ class LivreResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             'categorie' => new CategorieResource($this->whenLoaded('categorie')),
+            'images' => ImageResource::collection($this->whenLoaded('images')),
             'stock' => new StockResource($this->whenLoaded('stock')),
             'stockMouvements' => StockMouvementResource::collection($this->whenLoaded('stockMouvements')),
         ];

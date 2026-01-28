@@ -35,7 +35,7 @@ class StockController extends Controller
     {
 
         $data = $request->validate([
-            'livre_id' => 'required|exists:articles,id',
+            'livre_id' => 'required|exists:livres,id',
             'type' => 'required|in:entree,sortie',
             'quantite' => 'required|integer|min:1',
             'commentaire' => 'nullable|string',
@@ -77,9 +77,9 @@ class StockController extends Controller
     /**
      * Historique des mouvements d’un article
      */
-    public function mouvements($articleId)
+    public function mouvements($livreId)
     {
-        $mouvements = StockMouvement::where('article_id', $articleId)
+        $mouvements = StockMouvement::where('livre_id', $livreId)
             ->orderBy('created_at', 'desc')
             ->get();
 

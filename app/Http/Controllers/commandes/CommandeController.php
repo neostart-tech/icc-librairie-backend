@@ -20,9 +20,9 @@ class CommandeController extends Controller
         $request->validate([
             'phone' => 'required|string',
             'gateway_id' => 'required|integer',
-            'items' => 'required|array|min:1',
-            'items.*.livre_id' => 'required|uuid|exists:livres,id',
-            'items.*.quantite' => 'required|integer|min:1',
+            'livres' => 'required|array|min:1',
+            'livres.*.livre_id' => 'required|uuid|exists:livres,id',
+            'livres.*.quantite' => 'required|integer|min:1',
         ]);
 
         $paymentUrl = null;
@@ -33,7 +33,7 @@ class CommandeController extends Controller
             $total = 0;
             $lignes = [];
 
-            foreach ($request->items as $item) {
+            foreach ($request->livres as $item) {
                 $livre = Livre::lockForUpdate()->findOrFail($item['livre_id']);
 
                 if ($livre->stock->quantite < $item['quantite']) {
@@ -92,7 +92,7 @@ class CommandeController extends Controller
                 $request->gateway_id
             );
 
-            // 6️⃣ Mise à jour ref Semoa
+            // Mise à jour ref Semoa
             $paiement->update([
                 'reference_transaction' => $result['order_reference']
             ]);

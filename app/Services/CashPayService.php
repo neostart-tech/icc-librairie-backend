@@ -52,7 +52,7 @@ class CashPayService
     {
         $payload = [
             "amount" => $amount,
-            "currency" => "XOF",
+            // "currency" => "XOF",
             "client" => ["phone" => $phone],
             "gateway_id" => $gatewayId,
             "callback_url" => route('semoa.callback'),

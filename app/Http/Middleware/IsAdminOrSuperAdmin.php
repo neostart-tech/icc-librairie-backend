@@ -17,7 +17,7 @@ class IsAdminOrSuperAdmin
     {
         $user = auth()->user();
 
-        if ($user->role->role === 'user') {
+        if (!$user || $user->role->role === 'user') {
             return response()->json([
                 'message' => 'Accès refusé'
             ], 403);

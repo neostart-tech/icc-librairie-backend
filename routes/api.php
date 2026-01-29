@@ -4,11 +4,14 @@ use App\Http\Controllers\admin\UtilisateurController;
 use App\Http\Controllers\auth\AdminAuthController;
 use App\Http\Controllers\auth\UserAuthController;
 use App\Http\Controllers\categories\CategorieController;
+use App\Http\Controllers\commandes\CommandeController;
 use App\Http\Controllers\livres\LivreController;
+use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
 use App\Http\Controllers\stocks\StockController;
 use App\Http\Middleware\IsAdminOrSuperAdmin;
 use App\Http\Middleware\IsSuperAdmin;
+use App\Models\Gateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +48,15 @@ Route::get('/livres/{livre}', [LivreController::class, 'show']);
 // Stocks
 Route::get('/stocks', [StockController::class, 'index']);
 Route::get('/stocks/{livre}', [StockController::class, 'show']);
+
+Route::get('list-orders', function () {
+    $service = new \App\Services\CashPayService();
+    return $service->getlistOrders();
+});
+
+//callback Semoa
+Route::post('/paiements/callback', [PaiementController::class, 'callback'])
+    ->name('semoa.callback');
 
 
 // Routes nécessitant une authentification
@@ -91,4 +103,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
 
     });
+
+    //Commandes et paiements
+    Route::post('/commandes', [CommandeController::class, 'store']);
+
+
+
+    Route::get('/paiements/{id}', [PaiementController::class, 'show']);
+
+    Route::get('/gateways', function () {
+        return Gateway::where('actif', true)->get();
+    });
+
+
 });

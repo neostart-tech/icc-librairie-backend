@@ -45,11 +45,11 @@ class LivreController extends Controller
 
         $request->validate([
             'titre' => 'required|string|max:255',
-            'auteur' => 'required|string|max:255',
+            'auteur' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'prix' => 'required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
-            'categorie_id' => 'required|exists:categorie,id',
+            'categorie_id' => 'required|exists:categories,id',
             'images.*' => 'nullable|image|max:4096',
         ]);
 
@@ -87,14 +87,12 @@ class LivreController extends Controller
 
         $request->validate([
             'titre' => 'sometimes|required|string|max:255',
-            'auteur' => 'sometimes|required|string|max:255',
+            'auteur' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'prix' => 'sometimes|required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
-            'categorie_id' => 'sometimes|required|exists:categorie,id',
+            'categorie_id' => 'sometimes|required|exists:categories,id',
             'images.*' => 'nullable|image|max:4096',
-            'variantes' => 'nullable|array',
-            'variantes.*' => 'exists:variantes,id',
         ]);
 
         $livre->update($request->only([

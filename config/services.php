@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'cashpay' => [
+        'url' => env('CASHPAY_URL'),
+        'client_id' => env('CASHPAY_CLIENT_ID'),
+        'client_secret' => env('CASHPAY_CLIENT_SECRET'),
+        'username' => env('CASHPAY_USERNAME'),
+        'password' => env('CASHPAY_PASSWORD'),
+        'login' => env('CASHPAY_LOGIN'),
+        'apikey' => env('CASHPAY_API_KEY'),
+        'apireference' => env('CASHPAY_API_REFERENCE'),
+    ],
+
+
 ];

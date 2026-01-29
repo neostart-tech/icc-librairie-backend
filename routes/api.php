@@ -49,6 +49,15 @@ Route::get('/livres/{livre}', [LivreController::class, 'show']);
 Route::get('/stocks', [StockController::class, 'index']);
 Route::get('/stocks/{livre}', [StockController::class, 'show']);
 
+Route::get('list-orders', function () {
+    $service = new \App\Services\CashPayService();
+    return $service->getlistOrders();
+});
+
+//callback Semoa
+Route::post('/paiements/callback', [PaiementController::class, 'callback'])
+    ->name('semoa.callback');
+
 
 // Routes nécessitant une authentification
 Route::middleware('auth:sanctum')->group(function () {
@@ -98,8 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Commandes et paiements
     Route::post('/commandes', [CommandeController::class, 'store']);
 
-    Route::post('/paiements/callback', [PaiementController::class, 'callback'])
-        ->name('semoa.callback');
+
 
     Route::get('/paiements/{id}', [PaiementController::class, 'show']);
 

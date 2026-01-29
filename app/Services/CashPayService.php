@@ -55,11 +55,19 @@ class CashPayService
             // "currency" => "XOF",
             "client" => ["phone" => $phone],
             "gateway_id" => $gatewayId,
-            "callback_url" => route('semoa.callback'),
+            "callback_url" => config('app.url') . '/api/paiements/callback',
         ];
 
         return Http::withHeaders($this->signedHeaders())
             ->post(config('services.cashpay.url') . '/orders', $payload)
+            ->throw()
+            ->json();
+    }
+
+    public function getlistOrders()
+    {
+        return Http::withHeaders($this->signedHeaders())
+            ->get(config('services.cashpay.url') . '/orders')
             ->throw()
             ->json();
     }

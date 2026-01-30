@@ -69,6 +69,7 @@ class CategorieController extends Controller
         }
 
         $categorie->update($validator->validated());
+        $categorie->refresh();
 
         return response()->json([
             'message' => 'Catégorie mise à jour avec succès',

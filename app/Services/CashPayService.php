@@ -91,7 +91,7 @@ class CashPayService
         foreach ($gateways as $gateway) {
             Gateway::updateOrCreate(
                 [
-                    'external_id' => $gateway['id'],
+                    'id' => $gateway['id'],
                 ],
                 [
                     'reference' => $gateway['reference'],

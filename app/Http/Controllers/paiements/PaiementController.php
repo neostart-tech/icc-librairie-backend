@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Paiements;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PaiementResource;
 use App\Models\Paiement;
 use Illuminate\Http\Request;
 use Firebase\JWT\JWT;
@@ -72,12 +73,31 @@ class PaiementController extends Controller
     {
         $paiement = Paiement::with('commande')->findOrFail($id);
 
-        return response()->json([
-            'id' => $paiement->id,
-            'statut' => $paiement->statut,
-            'montant' => $paiement->montant,
-            'commande' => $paiement->commande->reference,
-        ]);
+        return response()->json(new PaiementResource($paiement));
+    }
+
+    /**
+     * Liste des paiements
+     */
+    public function index(Request $request)
+    {
+        $query = Paiement::with('commande');
+
+        // // Optionnel : filtrer par statut
+        // if ($request->filled('statut')) {
+        //     $query->where('statut', $request->statut);
+        // }
+
+        // // Optionnel : limiter aux paiements de l'utilisateur connecté
+        // if (auth()->check()) {
+        //     $query->whereHas('commande', function ($q) {
+        //         $q->where('user_id', auth()->id());
+        //     });
+        // }
+
+        $paiements = $query->latest();
+
+        return response()->json(PaiementResource::collection($paiements));
     }
 }
 

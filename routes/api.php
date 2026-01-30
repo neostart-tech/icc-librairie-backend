@@ -107,12 +107,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    //Commandes et paiements
+    //Commandes
     Route::post('/commandes', [CommandeController::class, 'store']);
     Route::get('/commandes', [CommandeController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
     Route::get('/commandes/{id}', [CommandeController::class, 'show']);
 
-
+    //Paiements
+    Route::get('/paiements', [PaiementController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
     Route::get('/paiements/{id}', [PaiementController::class, 'show']);
 
 });

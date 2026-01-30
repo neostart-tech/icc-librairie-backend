@@ -102,6 +102,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{user}', [UtilisateurController::class, 'show']);
             Route::put('/{user}', [UtilisateurController::class, 'update']);
             Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
+            Route::put('/{user}/make-admin', [UtilisateurController::class, 'makeAdmin']);
+            Route::put('/{user}/make-user', [UtilisateurController::class, 'makeUser']);
         });
         Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
 

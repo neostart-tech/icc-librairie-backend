@@ -57,25 +57,18 @@ class CategorieController extends Controller
      */
     public function update(Request $request, Categorie $categorie)
     {
-
-        $validator = Validator::make($request->all(), [
-            'libelle' => 'sometimes|string|max:255',
+        $data = $request->validate([
+            'libelle' => 'required|string|max:255',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $categorie->update($validator->validated());
-        $categorie->refresh();
+        $categorie->update($data);
 
         return response()->json([
             'message' => 'Catégorie mise à jour avec succès',
-            'data' => new CategorieResource($categorie)
+            'data' => new CategorieResource($categorie->fresh())
         ]);
     }
+
 
     /**
      * Suppression (admin seulement)

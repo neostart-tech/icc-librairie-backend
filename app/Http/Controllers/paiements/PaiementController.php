@@ -29,9 +29,9 @@ class PaiementController extends Controller
 
         // Décoder le JWT
         try {
-            $payload = \Firebase\JWT\JWT::decode(
+            $payload = JWT::decode(
                 $token,
-                new \Firebase\JWT\Key(config('services.cashpay.apikey'), 'HS256')
+                new Key(config('services.cashpay.apikey'), 'HS256')
             );
         } catch (\Exception $e) {
             \Log::error("JWT invalide", ['error' => $e->getMessage()]);

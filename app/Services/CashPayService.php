@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Gateway;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -81,5 +82,26 @@ class CashPayService
             ->get(config('services.cashpay.url') . '/gateways')
             ->throw()
             ->json();
+    }
+
+    public function syncGateways(): void
+    {
+        $gateways = $this->getGateways();
+
+        foreach ($gateways as $gateway) {
+            Gateway::updateOrCreate(
+                [
+                    'external_id' => $gateway['id'],
+                ],
+                [
+                    'reference' => $gateway['reference'],
+                    'libelle' => $gateway['libelle'],
+                    'methode' => $gateway['methode'],
+                    'psp' => $gateway['psp']['libelle'] ?? null,
+                    'logo_url' => $gateway['psp']['logo_url'] ?? null,
+                    'actif' => true,
+                ]
+            );
+        }
     }
 }

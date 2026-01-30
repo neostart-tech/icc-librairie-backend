@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\commandes;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CommandeResource;
 use App\Services\CashPayService;
 use Illuminate\Http\Request;
 use App\Models\Commande;
@@ -15,6 +16,37 @@ use Illuminate\Support\Str;
 
 class CommandeController extends Controller
 {
+    /**
+     * Liste des commandes de l'utilisateur connecté
+     */
+    public function index()
+    {
+        $commandes = Commande::with([
+            'detailcommandes.livre',
+            'paiement'
+        ])
+            ->where('user_id', auth()->id())
+            ->latest();
+
+        return CommandeResource::collection($commandes);
+    }
+
+    /**
+     * Détail d'une commande
+     */
+    public function show(string $id)
+    {
+        $commande = Commande::with([
+            'detailcommandes.livre',
+            'paiement'
+        ])
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+
+        return new CommandeResource($commande);
+    }
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -105,5 +137,6 @@ class CommandeController extends Controller
             'payment_url' => $paymentUrl
         ]);
     }
+
 
 }

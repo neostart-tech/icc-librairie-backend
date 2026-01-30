@@ -32,6 +32,19 @@ class CommandeController extends Controller
     }
 
     /**
+     * Liste de toutes les commandes (admin)
+     */
+    public function allOrders()
+    {
+        $commandes = Commande::with([
+            'detailcommandes.livre',
+            'paiement',
+            'user'
+        ])->latest();
+        return CommandeResource::collection($commandes);
+    }
+
+    /**
      * Détail d'une commande
      */
     public function show(string $id)

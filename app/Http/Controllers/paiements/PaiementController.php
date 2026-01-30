@@ -83,21 +83,22 @@ class PaiementController extends Controller
     {
         $query = Paiement::with('commande');
 
-        // // Optionnel : filtrer par statut
-        // if ($request->filled('statut')) {
-        //     $query->where('statut', $request->statut);
-        // }
-
-        // // Optionnel : limiter aux paiements de l'utilisateur connecté
-        // if (auth()->check()) {
-        //     $query->whereHas('commande', function ($q) {
-        //         $q->where('user_id', auth()->id());
-        //     });
-        // }
-
         $paiements = $query->latest();
 
         return response()->json(PaiementResource::collection($paiements));
+    }
+
+    /** Liste des paiements de l'utilisateur connecté
+     */
+    public function userPayments(Request $request)
+    {
+        $query = Paiement::with('commande')->whereHas('commande', function ($q) {
+            $q->where('user_id', auth()->id());
+        });
+
+        $paiements = $query->latest();
+        return response()->json(PaiementResource::collection($paiements));
+
     }
 }
 

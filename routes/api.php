@@ -112,11 +112,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Commandes
     Route::post('/commandes', [CommandeController::class, 'store']);
-    Route::get('/commandes', [CommandeController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
+    Route::get('/commandes', [CommandeController::class, 'index']);
     Route::get('/commandes/{id}', [CommandeController::class, 'show']);
+    Route::get('/all-commandes', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
 
     //Paiements
     Route::get('/paiements', [PaiementController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
     Route::get('/paiements/{id}', [PaiementController::class, 'show']);
+    Route::get('/user-paiements', [PaiementController::class, 'userPayments']);
 
 });

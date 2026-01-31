@@ -46,5 +46,11 @@ return [
         'apireference' => env('CASHPAY_API_REFERENCE'),
     ],
 
+    'icc' => [
+        'url' => env('URL_ICC_COVOITURAGE'),
+        'api_key' => env('ICC_API_KEY'),
+    ],
+
+
 
 ];

@@ -33,6 +33,7 @@ Route::prefix('admin')->group(function () {
 Route::prefix('user')->group(function () {
     Route::post('/register', [UserAuthController::class, 'register']);
     Route::post('/login', [UserAuthController::class, 'login']);
+    Route::post('/login-sso', [UserAuthController::class, 'login_sso']);
     Route::post('forgot-password', [UserAuthController::class, 'forgotPassword']);
     Route::post('reset-password', [UserAuthController::class, 'resetPassword']);
 });

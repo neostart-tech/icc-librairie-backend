@@ -21,12 +21,18 @@ class CommandeController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $commandes = Commande::with([
             'detailcommandes.livre',
-            'paiement'
+            'paiements'
         ])
-            ->where('user_id', auth()->id())
-            ->latest();
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
 
         return CommandeResource::collection($commandes);
     }
@@ -38,9 +44,9 @@ class CommandeController extends Controller
     {
         $commandes = Commande::with([
             'detailcommandes.livre',
-            'paiement',
+            'paiements',
             'user'
-        ])->latest();
+        ])->latest()->get();
         return CommandeResource::collection($commandes);
     }
 
@@ -51,7 +57,7 @@ class CommandeController extends Controller
     {
         $commande = Commande::with([
             'detailcommandes.livre',
-            'paiement'
+            'paiements'
         ])
             ->where('user_id', auth()->id())
             ->findOrFail($id);

@@ -96,6 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Gestion des utilisateurs et administrateurs
     Route::prefix('/admins')->group(function () {
 
+        Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
+
         Route::middleware(IsSuperAdmin::class)->group(function () {
             Route::get('/', [UtilisateurController::class, 'index']);
             Route::post('/', [UtilisateurController::class, 'store']);
@@ -105,20 +107,24 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{user}/make-admin', [UtilisateurController::class, 'makeAdmin']);
             Route::put('/{user}/make-user', [UtilisateurController::class, 'makeUser']);
         });
-        Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
+
         Route::get('/users/{user}', [UtilisateurController::class, 'show'])->middleware(IsAdminOrSuperAdmin::class);
 
     });
 
     //Commandes
-    Route::post('/commandes', [CommandeController::class, 'store']);
-    Route::get('/commandes', [CommandeController::class, 'index']);
-    Route::get('/commandes/{id}', [CommandeController::class, 'show']);
-    Route::get('/all-commandes', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
+    Route::prefix('/commandes')->group(function () {
+        Route::post('/', [CommandeController::class, 'store']);
+        Route::get('/', [CommandeController::class, 'index']);
+        Route::get('/all', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
+        Route::get('/{id}', [CommandeController::class, 'show']);
+    });
 
     //Paiements
-    Route::get('/paiements', [PaiementController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
-    Route::get('/paiements/{id}', [PaiementController::class, 'show']);
-    Route::get('/user-paiements', [PaiementController::class, 'userPayments']);
+    Route::prefix('/paiements')->group(function () {
+        Route::get('/', [PaiementController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
+        Route::get('/user-paiements', [PaiementController::class, 'userPayments']);
+        Route::get('/{id}', [PaiementController::class, 'show']);
+    });
 
 });

@@ -81,24 +81,27 @@ class PaiementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Paiement::with('commande');
-
-        $paiements = $query->latest();
+        $paiements = Paiement::with('commande')
+            ->latest()
+            ->get(); // <-- Important !
 
         return response()->json(PaiementResource::collection($paiements));
     }
+
 
     /** Liste des paiements de l'utilisateur connecté
      */
     public function userPayments(Request $request)
     {
-        $query = Paiement::with('commande')->whereHas('commande', function ($q) {
-            $q->where('user_id', auth()->id());
-        });
+        $paiements = Paiement::with('commande')
+            ->whereHas('commande', function ($q) {
+                $q->where('user_id', auth()->id());
+            })
+            ->latest()
+            ->get(); // <-- Important !
 
-        $paiements = $query->latest();
         return response()->json(PaiementResource::collection($paiements));
-
     }
+
 }
 

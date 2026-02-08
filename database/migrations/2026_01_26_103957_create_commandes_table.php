@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
             $table->integer('prix_total');
-            $table->enum('statut', ['en_cours', 'termine']);
+            $table->enum('statut', ['en_cours', 'termine', 'traite']);
             $table->foreignUuid('user_id')->constrained('users');
             $table->timestamps();
         });

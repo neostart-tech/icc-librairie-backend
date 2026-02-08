@@ -82,8 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestion du stock
     Route::prefix('/stocks')->group(function () {
-        Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
+        Route::get('/mouvements/all', [StockController::class, 'allMouvements']);
         Route::post('/mouvement', [StockController::class, 'store']);
+        Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
     })->middleware(IsAdminOrSuperAdmin::class);
 
     // Profil
@@ -119,6 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [CommandeController::class, 'index']);
         Route::get('/all', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
         Route::get('/{id}', [CommandeController::class, 'show']);
+        Route::put('/{id}/traiter', [CommandeController::class, 'traiterCommande']);
     });
 
     //Paiements

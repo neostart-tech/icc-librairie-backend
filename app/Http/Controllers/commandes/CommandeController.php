@@ -135,13 +135,21 @@ class CommandeController extends Controller
             ]);
 
             // Appel Semoa POS
-            $cashpay = app(CashPayService::class);
+            try {
+                $cashpay = app(CashPayService::class);
 
-            $result = $cashpay->createOrder(
-                $total,
-                $request->phone,
-                $request->gateway_id
-            );
+                $result = $cashpay->createOrder(
+                    $total,
+                    $request->phone,
+                    $request->gateway_id
+                );
+            } catch (\Throwable $e) {
+                logger()->error('Erreur Semoa', [
+                    'message' => $e->getMessage()
+                ]);
+
+                throw new \Exception("Erreur lors de l'initialisation du paiement");
+            }
 
             // Mise à jour ref Semoa
             $paiement->update([
@@ -153,7 +161,19 @@ class CommandeController extends Controller
 
         return response()->json([
             'success' => true,
-            'payment_url' => $paymentUrl
+            'payment_url' => $paymentUrl,
+        ], 201);
+    }
+
+    public function traiterCommande(Commande $commande)
+    {
+        $commande->update([
+            'statut' => 'traite'
+        ]);
+
+        return response()->json([
+            'message' => 'Commande traitee avec succès',
+            'data' => new CommandeResource($commande->fresh())
         ]);
     }
 

@@ -26,6 +26,8 @@ class User extends Authenticatable
         'telephone',
         'password',
         'role_id',
+        'appmobile',
+        'statut',
     ];
 
     /**

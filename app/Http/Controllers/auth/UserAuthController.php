@@ -242,6 +242,7 @@ class UserAuthController extends Controller
                 'telephone' => $userData['telephone'] ?? null,
                 'password' => Hash::make($request->password),
                 'role_id' => $role->id,
+                'appmobile' => true,
             ]);
         }
 

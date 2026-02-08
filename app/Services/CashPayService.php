@@ -57,6 +57,7 @@ class CashPayService
             "client" => ["phone" => $phone],
             "gateway_id" => $gatewayId,
             "callback_url" => config('app.url') . '/api/paiements/callback',
+            "redirect_url" => config('services.cashpay.redirect_url') . '/payment/return',
         ];
 
         return Http::withHeaders($this->signedHeaders())

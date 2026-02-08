@@ -28,6 +28,7 @@ class CategorieController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'libelle' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -59,6 +60,7 @@ class CategorieController extends Controller
     {
         $data = $request->validate([
             'libelle' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $categorie->update($data);

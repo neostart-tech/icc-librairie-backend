@@ -108,6 +108,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
             Route::put('/{user}/make-admin', [UtilisateurController::class, 'makeAdmin']);
             Route::put('/{user}/make-user', [UtilisateurController::class, 'makeUser']);
+            Route::put('/{user}/lock', [UtilisateurController::class, 'lock']);
+            Route::put('/{user}/unlock', [UtilisateurController::class, 'unlock']);
         });
 
         Route::get('/users/{user}', [UtilisateurController::class, 'show'])->middleware(IsAdminOrSuperAdmin::class);

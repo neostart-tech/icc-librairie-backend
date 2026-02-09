@@ -176,4 +176,42 @@ class UtilisateurController extends Controller
             'data' => new UserResource($user->load('role'))
         ]);
     }
+
+    /**
+     * Bloquer un user
+     */
+    public function lock(User $user)
+    {
+        if ($user->role->role === 'superadmin') {
+            return response()->json([
+                'message' => 'Impossible de bloquer un superadmin'
+            ], 403);
+        }
+
+        $user->update([
+            'statut' => 'inactif'
+        ]);
+
+        return response()->json([
+            'message' => 'Utilisateur bloqué avec succès',
+            'data' => $user
+        ]);
+    }
+
+    /**
+     * Debloquer un user
+     */
+    public function unlock(User $user)
+    {
+
+        $user->update([
+            'statut' => 'actif'
+        ]);
+
+        return response()->json([
+            'message' => 'Utilisateur débloqué avec succès',
+            'data' => $user
+        ]);
+    }
+
 }

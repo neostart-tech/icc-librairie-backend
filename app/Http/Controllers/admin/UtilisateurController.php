@@ -4,10 +4,13 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Mail\UserPasswordGenerated;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
 class UtilisateurController extends Controller
@@ -49,7 +52,6 @@ class UtilisateurController extends Controller
             'prenom' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'telephone' => 'nullable|string|unique:users',
-            'password' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -64,13 +66,16 @@ class UtilisateurController extends Controller
             'prenom' => $request->prenom,
             'email' => $request->email,
             'telephone' => $request->telephone,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($generatedPassword = Str::upper(Str::random(8))),
             'role_id' => $adminRole->id,
         ]);
 
+        // Envoyer l'email avec le mot de passe généré
+        Mail::to($user->email)->send(new UserPasswordGenerated($user, $generatedPassword));
+
         return response()->json([
             'message' => 'Administrateur créé avec succès',
-            'data' => new UserResource($user->load('role'))
+            'data' => new $user
         ], 201);
     }
 

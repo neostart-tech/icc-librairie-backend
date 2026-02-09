@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategorieResource extends JsonResource
+class GatewayResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,16 @@ class CategorieResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'semoa_id' => $this->semoa_id,
+            'reference' => $this->reference,
             'libelle' => $this->libelle,
-            'description' => $this->description,
+            'psp' => $this->psp,
+            'psp_logo' => $this->psp_logo,
+            'methode' => $this->methode,
+            'logo_url' => $this->logo_url,
+            'actif' => $this->actif,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-
-            'livres' => LivreResource::collection($this->whenLoaded('livres')),
         ];
     }
 }

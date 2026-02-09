@@ -15,7 +15,8 @@ class ProfilController extends Controller
      */
     public function show(Request $request)
     {
-        return new UserResource($request->user());
+         $user = $request->user()->load('role', 'commandes');
+         return new UserResource($user);
     }
 
     /**

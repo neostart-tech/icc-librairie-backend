@@ -44,7 +44,14 @@ return [
         'login' => env('CASHPAY_LOGIN'),
         'apikey' => env('CASHPAY_API_KEY'),
         'apireference' => env('CASHPAY_API_REFERENCE'),
+        'redirect_url' => env('CASHPAY_REDIRECT_URL'),
     ],
+
+    'icc' => [
+        'url' => env('URL_ICC_COVOITURAGE'),
+        'api_key' => env('ICC_API_KEY'),
+    ],
+
 
 
 ];

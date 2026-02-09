@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Paiements;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PaiementResource;
 use App\Models\Paiement;
 use Illuminate\Http\Request;
 use Firebase\JWT\JWT;
@@ -29,9 +30,9 @@ class PaiementController extends Controller
 
         // Décoder le JWT
         try {
-            $payload = \Firebase\JWT\JWT::decode(
+            $payload = JWT::decode(
                 $token,
-                new \Firebase\JWT\Key(config('services.cashpay.apikey'), 'HS256')
+                new Key(config('services.cashpay.apikey'), 'HS256')
             );
         } catch (\Exception $e) {
             \Log::error("JWT invalide", ['error' => $e->getMessage()]);
@@ -72,12 +73,35 @@ class PaiementController extends Controller
     {
         $paiement = Paiement::with('commande')->findOrFail($id);
 
-        return response()->json([
-            'id' => $paiement->id,
-            'statut' => $paiement->statut,
-            'montant' => $paiement->montant,
-            'commande' => $paiement->commande->reference,
-        ]);
+        return response()->json(new PaiementResource($paiement));
     }
+
+    /**
+     * Liste des paiements
+     */
+    public function index(Request $request)
+    {
+        $paiements = Paiement::with('commande')
+            ->latest()
+            ->get(); // <-- Important !
+
+        return response()->json(PaiementResource::collection($paiements));
+    }
+
+
+    /** Liste des paiements de l'utilisateur connecté
+     */
+    public function userPayments(Request $request)
+    {
+        $paiements = Paiement::with('commande')
+            ->whereHas('commande', function ($q) {
+                $q->where('user_id', auth()->id());
+            })
+            ->latest()
+            ->get(); // <-- Important !
+
+        return response()->json(PaiementResource::collection($paiements));
+    }
+
 }
 

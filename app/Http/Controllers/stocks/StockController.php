@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\stocks;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StockMouvementResource;
 use App\Models\Livre;
 use App\Models\Stock;
 use App\Models\StockMouvement;
@@ -83,6 +84,16 @@ class StockController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        return response()->json($mouvements);
+    }
+
+    /**
+     * Historique de tous les mouvements
+     */
+
+    public function allMouvements()
+    {
+        $mouvements = StockMouvement::with('livre.images')->get();
         return response()->json($mouvements);
     }
 }

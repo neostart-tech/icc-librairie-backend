@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\commandes;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CommandeResource;
 use App\Services\CashPayService;
 use Illuminate\Http\Request;
 use App\Models\Commande;
@@ -15,6 +16,56 @@ use Illuminate\Support\Str;
 
 class CommandeController extends Controller
 {
+    /**
+     * Liste des commandes de l'utilisateur connecté
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $commandes = Commande::with([
+            'detailcommandes.livre',
+            'paiements'
+        ])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return CommandeResource::collection($commandes);
+    }
+
+    /**
+     * Liste de toutes les commandes (admin)
+     */
+    public function allOrders()
+    {
+        $commandes = Commande::with([
+            'detailcommandes.livre',
+            'paiements',
+            'user'
+        ])->latest()->get();
+        return CommandeResource::collection($commandes);
+    }
+
+    /**
+     * Détail d'une commande
+     */
+    public function show(string $id)
+    {
+        $commande = Commande::with([
+            'detailcommandes.livre',
+            'paiements'
+        ])
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+
+        return new CommandeResource($commande);
+    }
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -84,13 +135,21 @@ class CommandeController extends Controller
             ]);
 
             // Appel Semoa POS
-            $cashpay = app(CashPayService::class);
+            try {
+                $cashpay = app(CashPayService::class);
 
-            $result = $cashpay->createOrder(
-                $total,
-                $request->phone,
-                $request->gateway_id
-            );
+                $result = $cashpay->createOrder(
+                    $total,
+                    $request->phone,
+                    $request->gateway_id
+                );
+            } catch (\Throwable $e) {
+                logger()->error('Erreur Semoa', [
+                    'message' => $e->getMessage()
+                ]);
+
+                throw new \Exception("Erreur lors de l'initialisation du paiement");
+            }
 
             // Mise à jour ref Semoa
             $paiement->update([
@@ -102,8 +161,21 @@ class CommandeController extends Controller
 
         return response()->json([
             'success' => true,
-            'payment_url' => $paymentUrl
+            'payment_url' => $paymentUrl,
+        ], 201);
+    }
+
+    public function traiterCommande(Commande $commande)
+    {
+        $commande->update([
+            'statut' => 'traite'
+        ]);
+
+        return response()->json([
+            'message' => 'Commande traitee avec succès',
+            'data' => new CommandeResource($commande->fresh())
         ]);
     }
+
 
 }

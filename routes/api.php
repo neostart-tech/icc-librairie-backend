@@ -5,13 +5,13 @@ use App\Http\Controllers\auth\AdminAuthController;
 use App\Http\Controllers\auth\UserAuthController;
 use App\Http\Controllers\categories\CategorieController;
 use App\Http\Controllers\commandes\CommandeController;
+use App\Http\Controllers\gateways\GatewayController;
 use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
 use App\Http\Controllers\stocks\StockController;
 use App\Http\Middleware\IsAdminOrSuperAdmin;
 use App\Http\Middleware\IsSuperAdmin;
-use App\Models\Gateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +33,7 @@ Route::prefix('admin')->group(function () {
 Route::prefix('user')->group(function () {
     Route::post('/register', [UserAuthController::class, 'register']);
     Route::post('/login', [UserAuthController::class, 'login']);
+    Route::post('/login-sso', [UserAuthController::class, 'login_sso']);
     Route::post('forgot-password', [UserAuthController::class, 'forgotPassword']);
     Route::post('reset-password', [UserAuthController::class, 'resetPassword']);
 });
@@ -58,6 +59,9 @@ Route::get('list-orders', function () {
 Route::post('/paiements/callback', [PaiementController::class, 'callback'])
     ->name('semoa.callback');
 
+//Gateways
+Route::get('/gateways', [GatewayController::class, 'index']);
+
 
 // Routes nécessitant une authentification
 Route::middleware('auth:sanctum')->group(function () {
@@ -78,8 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestion du stock
     Route::prefix('/stocks')->group(function () {
-        Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
+        Route::get('/mouvements/all', [StockController::class, 'allMouvements']);
         Route::post('/mouvement', [StockController::class, 'store']);
+        Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
     })->middleware(IsAdminOrSuperAdmin::class);
 
     // Profil
@@ -93,27 +98,38 @@ Route::middleware('auth:sanctum')->group(function () {
     // Gestion des utilisateurs et administrateurs
     Route::prefix('/admins')->group(function () {
 
+        Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
+
         Route::middleware(IsSuperAdmin::class)->group(function () {
             Route::get('/', [UtilisateurController::class, 'index']);
             Route::post('/', [UtilisateurController::class, 'store']);
             Route::get('/{user}', [UtilisateurController::class, 'show']);
             Route::put('/{user}', [UtilisateurController::class, 'update']);
             Route::delete('/{user}', [UtilisateurController::class, 'destroy']);
+            Route::put('/{user}/make-admin', [UtilisateurController::class, 'makeAdmin']);
+            Route::put('/{user}/make-user', [UtilisateurController::class, 'makeUser']);
+            Route::put('/{user}/lock', [UtilisateurController::class, 'lock']);
+            Route::put('/{user}/unlock', [UtilisateurController::class, 'unlock']);
         });
-        Route::get('/all-users', [UtilisateurController::class, 'allUsers'])->middleware(IsAdminOrSuperAdmin::class); // Admins et superadmins
+
+        Route::get('/users/{user}', [UtilisateurController::class, 'show'])->middleware(IsAdminOrSuperAdmin::class);
 
     });
 
-    //Commandes et paiements
-    Route::post('/commandes', [CommandeController::class, 'store']);
-
-
-
-    Route::get('/paiements/{id}', [PaiementController::class, 'show']);
-
-    Route::get('/gateways', function () {
-        return Gateway::where('actif', true)->get();
+    //Commandes
+    Route::prefix('/commandes')->group(function () {
+        Route::post('/', [CommandeController::class, 'store']);
+        Route::get('/', [CommandeController::class, 'index']);
+        Route::get('/all', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
+        Route::get('/{id}', [CommandeController::class, 'show']);
+        Route::put('/{id}/traiter', [CommandeController::class, 'traiterCommande']);
     });
 
+    //Paiements
+    Route::prefix('/paiements')->group(function () {
+        Route::get('/', [PaiementController::class, 'index'])->middleware(IsAdminOrSuperAdmin::class);
+        Route::get('/user-paiements', [PaiementController::class, 'userPayments']);
+        Route::get('/{id}', [PaiementController::class, 'show']);
+    });
 
 });

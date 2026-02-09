@@ -19,8 +19,17 @@ trait HasUuid
     {
         return false;
     }
+
     public function getKeyType()
     {
         return 'string';
+    }
+
+    /**
+     * Pour le Route Model Binding (DELETE, PUT, GET /{model})
+     */
+    public function getRouteKeyName()
+    {
+        return $this->getKeyName(); // donc uuid
     }
 }

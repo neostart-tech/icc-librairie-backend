@@ -173,7 +173,7 @@ class CommandeController extends Controller
 
         return response()->json([
             'message' => 'Commande traitee avec succès',
-            'data' => new CommandeResource($commande->fresh())
+            'data' => $commande
         ]);
     }
 

@@ -46,6 +46,12 @@ class AdminAuthController extends Controller
             ], 403);
         }
 
+        if ($user->statut === 'inactif') {
+          return response()->json([
+             'message' => 'Votre compte a été bloqué, veuillez contacter les administrateurs.'
+          ], 403);
+        }
+
         // Créer le token
         $token = $user->createToken('admin-token')->plainTextToken;
 

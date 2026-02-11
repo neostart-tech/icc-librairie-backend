@@ -75,6 +75,12 @@ class UserAuthController extends Controller
             return response()->json(['message' => 'Email ou mot de passe incorrect'], 401);
         }
 
+        if ($user->statut === 'inactif') {
+            return response()->json([
+                'message' => 'Votre compte a été bloqué, veuillez contacter les administrateurs.'
+            ], 403);
+        }
+
         // if (!$user->hasVerifiedEmail()) {
         //     return response()->json(['message' => 'Email non vérifié. Veuillez vérifier votre boîte mail.'], 403);
         // }
@@ -199,15 +205,12 @@ class UserAuthController extends Controller
 
         // L’API répond mais erreur HTTP
         if ($response->failed()) {
-            \Log::warning('SSO ICC failed response', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+
+            $ssoJson = $response->json();
 
             return response()->json([
-                'message' => 'Erreur SSO',
+                'message' => $ssoJson['message'] ?? 'Erreur SSO',
                 'sso_status' => $response->status(),
-                'sso_response' => $response->json(),
             ], $response->status());
         }
 

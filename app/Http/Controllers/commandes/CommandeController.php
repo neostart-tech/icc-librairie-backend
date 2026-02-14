@@ -4,6 +4,7 @@ namespace App\Http\Controllers\commandes;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommandeResource;
+use App\Notifications\CommandeTraiteeNotification;
 use App\Services\CashPayService;
 use Illuminate\Http\Request;
 use App\Models\Commande;
@@ -110,7 +111,7 @@ class CommandeController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Détails + décrément stock
+            // Détails de commande
             foreach ($lignes as $ligne) {
 
                 DetailCommande::create([
@@ -120,9 +121,8 @@ class CommandeController extends Controller
                     'quantite' => $ligne['quantite'],
                     'prix_unitaire' => $ligne['prix'],
                 ]);
-
-                $ligne['livre']->stock->decrement('quantite', $ligne['quantite']);
             }
+
 
             // Paiement (PENDING)
             $paiement = Paiement::create([
@@ -170,6 +170,9 @@ class CommandeController extends Controller
         $commande->update([
             'statut' => 'traite'
         ]);
+
+        // Envoyer notification à l'utilisateur
+        $commande->user->notify(new CommandeTraiteeNotification($commande));
 
         return response()->json([
             'message' => 'Commande traitee avec succès',

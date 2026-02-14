@@ -132,4 +132,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [PaiementController::class, 'show']);
     });
 
+    //Notifications
+    Route::prefix('/notifications')->group(function () {
+        Route::get('/', function (Request $request) {
+            return $request->user()->notifications;
+        });
+
+        Route::post('/read-all', function (Request $r) {
+            $r->user()->unreadNotifications->markAsRead();
+            return response()->noContent();
+        });
+
+        Route::post('/{id}/read', function ($id, Request $request) {
+            $request->user()->notifications()->findOrFail($id)->markAsRead();
+        });
+
+        Route::delete('/{id}', function ($id, Request $request) {
+            $notification = $request->user()
+                ->notifications()
+                ->findOrFail($id);
+
+            $notification->delete();
+
+            return response()->noContent();
+        });
+    })->middleware(IsAdminOrSuperAdmin::class);
+
 });

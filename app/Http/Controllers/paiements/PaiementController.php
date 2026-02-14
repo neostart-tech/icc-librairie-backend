@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Paiements;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaiementResource;
 use App\Models\Paiement;
+use App\Notifications\CommandeTermineeNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
@@ -70,6 +71,9 @@ class PaiementController extends Controller
             $paiement->update(['statut' => 'success']);
             $commande = $paiement->commande;
             $commande->update(['statut' => 'termine']);
+
+            // Envoyer notification à l’utilisateur
+            $commande->user->notify(new CommandeTermineeNotification($commande));
 
             // Décrémentation stock
             foreach ($commande->detailcommandes as $detail) {

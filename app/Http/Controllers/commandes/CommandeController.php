@@ -110,7 +110,7 @@ class CommandeController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Détails + décrément stock
+            // Détails de commande
             foreach ($lignes as $ligne) {
 
                 DetailCommande::create([
@@ -120,9 +120,8 @@ class CommandeController extends Controller
                     'quantite' => $ligne['quantite'],
                     'prix_unitaire' => $ligne['prix'],
                 ]);
-
-                $ligne['livre']->stock->decrement('quantite', $ligne['quantite']);
             }
+
 
             // Paiement (PENDING)
             $paiement = Paiement::create([

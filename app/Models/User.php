@@ -62,4 +62,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Commande::class);
     }
+
+    public static function admins()
+    {
+        return self::whereHas('role', function ($q) {
+            $q->whereIn('role', ['admin', 'superadmin']);
+        })->get();
+    }
+
 }

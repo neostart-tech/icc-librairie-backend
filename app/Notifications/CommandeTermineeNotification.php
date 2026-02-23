@@ -51,8 +51,8 @@ class CommandeTermineeNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => "Commande terminée",
-            'message' => "Votre commande #{$this->commande->id} a été effectuée avec succès. Nous procédons au traitement",
+            'title' => "Commande effectuée",
+            'message' => "Votre commande #{$this->commande->reference} a été effectuée avec succès. Nous procédons au traitement",
             'commande_id' => $this->commande->id,
         ];
     }

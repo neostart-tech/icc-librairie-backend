@@ -51,8 +51,8 @@ class CommandeTraiteeNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => 'Commande traitée',
-            'message' => "Votre commande #{$this->commande->reference} a été traitée avec succès.",
+            'title' => 'Commande livrée',
+            'message' => "Votre commande #{$this->commande->reference} a été livrée avec succès.",
             'commande_id' => $this->commande->id,
         ];
     }

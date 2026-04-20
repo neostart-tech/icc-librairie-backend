@@ -22,10 +22,12 @@ class LivreResource extends JsonResource
             'prix' => $this->prix,
             'prix_promo' => $this->prix_promo,
             'categorie_id' => $this->categorie_id,
+            'id_auteur' => $this->id_auteur,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
             'categorie' => new CategorieResource($this->whenLoaded('categorie')),
+            'auteurRel' => new AuteurResource($this->whenLoaded('auteurRel')),
             'images' => ImageResource::collection($this->whenLoaded('images')),
             'stock' => new StockResource($this->whenLoaded('stock')),
             'stockMouvements' => StockMouvementResource::collection($this->whenLoaded('stockMouvements')),

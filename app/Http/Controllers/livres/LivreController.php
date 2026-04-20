@@ -4,6 +4,7 @@ namespace App\Http\Controllers\livres;
 
 use App\Http\Controllers\Controller;
 use App\Models\Livre;
+use App\Http\Resources\LivreResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,10 +18,11 @@ class LivreController extends Controller
         $livres = Livre::with([
             'images',
             'stock',
-            'categorie'
+            'categorie',
+            'auteurRel'
         ])->latest()->get();
 
-        return response()->json($livres);
+        return LivreResource::collection($livres);
     }
 
     /**
@@ -31,10 +33,11 @@ class LivreController extends Controller
         $livre->load([
             'images',
             'stock',
-            'categorie'
+            'categorie',
+            'auteurRel'
         ]);
 
-        return response()->json($livre);
+        return new LivreResource($livre);
     }
 
     /**
@@ -42,7 +45,6 @@ class LivreController extends Controller
      */
     public function store(Request $request)
     {
-
         $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -50,6 +52,7 @@ class LivreController extends Controller
             'prix' => 'required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'required|exists:categories,id',
+            'id_auteur' => 'nullable|exists:auteurs,id',
             'images.*' => 'nullable|image|max:4096',
         ]);
 
@@ -59,7 +62,8 @@ class LivreController extends Controller
             'description',
             'prix',
             'prix_promo',
-            'categorie_id'
+            'categorie_id',
+            'id_auteur'
         ]));
 
         // Upload images
@@ -73,10 +77,10 @@ class LivreController extends Controller
             }
         }
 
-        return response()->json(
-            $livre->load(['images', 'stock', 'categorie']),
-            201
-        );
+        return response()->json([
+            'message' => 'Livre créé avec succès',
+            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+        ], 201);
     }
 
     /*
@@ -84,7 +88,6 @@ class LivreController extends Controller
      */
     public function update(Request $request, Livre $livre)
     {
-
         $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -92,6 +95,7 @@ class LivreController extends Controller
             'prix' => 'sometimes|required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'sometimes|required|exists:categories,id',
+            'id_auteur' => 'nullable|exists:auteurs,id',
             'images.*' => 'nullable|image|max:4096',
         ]);
 
@@ -101,7 +105,8 @@ class LivreController extends Controller
             'description',
             'prix',
             'prix_promo',
-            'categorie_id'
+            'categorie_id',
+            'id_auteur'
         ]));
 
         // Ajouter nouvelles images
@@ -115,9 +120,10 @@ class LivreController extends Controller
             }
         }
 
-        return response()->json(
-            $livre->load(['images', 'stock', 'categorie'])
-        );
+        return response()->json([
+            'message' => 'Livre mis à jour avec succès',
+            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+        ]);
     }
 
     /**
@@ -125,7 +131,6 @@ class LivreController extends Controller
      */
     public function destroy(Livre $livre)
     {
-
         // Supprimer les images physiques
         foreach ($livre->images as $image) {
             Storage::disk('public')->delete($image->path);

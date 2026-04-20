@@ -9,11 +9,16 @@ class Livre extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['titre', 'auteur', 'description', 'prix', 'prix_promo', 'categorie_id'];
+    protected $fillable = ['titre', 'auteur', 'id_auteur', 'description', 'prix', 'prix_promo', 'categorie_id'];
 
     public function categorie()
     {
         return $this->belongsTo(Categorie::class);
+    }
+
+    public function auteurRel()
+    {
+        return $this->belongsTo(Auteur::class, 'id_auteur');
     }
 
     public function stock()

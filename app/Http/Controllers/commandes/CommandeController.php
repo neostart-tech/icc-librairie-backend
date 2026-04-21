@@ -171,8 +171,16 @@ class CommandeController extends Controller
             'statut' => 'traite'
         ]);
 
+        $commande->load('detailcommandes.livre', 'user');
+
         // Envoyer notification à l'utilisateur
         $commande->user->notify(new CommandeTraiteeNotification($commande));
+
+        // Envoyer notification aux admins
+        \Illuminate\Support\Facades\Notification::send(
+            \App\Models\User::admins(),
+            new CommandeTraiteeNotification($commande)
+        );
 
         return response()->json([
             'message' => 'Commande traitee avec succès',

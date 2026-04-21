@@ -29,7 +29,7 @@ class CommandeTraiteeNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['database']; // notification stockée dans la table notifications
+        return ['database', 'mail'];
     }
 
     /**
@@ -37,10 +37,21 @@ class CommandeTraiteeNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Admin notification
+        if ($notifiable->role && in_array($notifiable->role->role, ['admin', 'superadmin'])) {
+            return (new MailMessage)
+                ->subject('Commande Traitée - Notification Interne')
+                ->view('emails.order-treated-admin', [
+                    'commande' => $this->commande,
+                ]);
+        }
+
+        // User notification
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('Votre commande a été servie - ICC Librairie')
+            ->view('emails.order-treated', [
+                'commande' => $this->commande,
+            ]);
     }
 
     /**

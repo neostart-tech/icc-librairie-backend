@@ -43,7 +43,7 @@ class PaiementController extends Controller
             return response()->json(['error' => 'JWT invalide'], 400);
         }
 
-        $paiement = Paiement::with('commande.detailcommandes.livre.stock')
+        $paiement = Paiement::with('commande.user', 'commande.detailcommandes.livre.stock')
             ->where('reference_transaction', $payload->order_reference)
             ->first();
 
@@ -62,7 +62,11 @@ class PaiementController extends Controller
 
         DB::transaction(function () use ($payload, $paiement) {
 
-            if ($payload->state !== 'Paid') {
+            if (strtolower($payload->state) !== 'paid') {
+                \Log::warning("Paiement échoué via callback", [
+                    'state' => $payload->state,
+                    'reference_transaction' => $payload->order_reference
+                ]);
                 $paiement->update(['statut' => 'failed']);
                 return;
             }
@@ -73,7 +77,11 @@ class PaiementController extends Controller
             $commande->update(['statut' => 'termine']);
 
             // Envoyer notification à l’utilisateur
-            $commande->user->notify(new CommandeTermineeNotification($commande));
+            try {
+                $commande->user->notify(new CommandeTermineeNotification($commande));
+            } catch (\Exception $e) {
+                \Log::error("Erreur notification client", ['error' => $e->getMessage()]);
+            }
 
             // Décrémentation stock
             foreach ($commande->detailcommandes as $detail) {
@@ -93,23 +101,46 @@ class PaiementController extends Controller
                 $admins = User::admins();
 
                 if ($stockRestant === 0) {
-                    Notification::send(
-                        $admins,
-                        new StockEpuiseNotification($detail->livre)
-                    );
+                    try {
+                        Notification::send(
+                            $admins,
+                            new StockEpuiseNotification($detail->livre)
+                        );
+                    } catch (\Exception $e) {
+                        \Log::error("Erreur notification stock épuisé", ['error' => $e->getMessage()]);
+                    }
                 } elseif ($stockRestant <= 3) {
-                    Notification::send(
-                        $admins,
-                        new StockFaibleNotification($detail->livre, $stockRestant)
-                    );
+                    try {
+                        Notification::send(
+                            $admins,
+                            new StockFaibleNotification($detail->livre, $stockRestant)
+                        );
+                    } catch (\Exception $e) {
+                        \Log::error("Erreur notification stock faible", ['error' => $e->getMessage()]);
+                    }
                 }
             }
 
-            // Notification commande terminée
-            Notification::send(
-                User::admins(),
-                new NouvelleCommandeNotification($commande)
-            );
+            // Notification commande terminée pour les admins
+            $admins = User::whereHas('role', function ($q) {
+                $q->whereIn('role', ['admin', 'superadmin']);
+            })->with('role')->get();
+
+            \Log::info("Envoi notification admin", [
+                'count' => $admins->count(),
+                'emails' => $admins->pluck('email')->toArray()
+            ]);
+            
+            if ($admins->isNotEmpty()) {
+                try {
+                    Notification::send(
+                        $admins,
+                        new NouvelleCommandeNotification($commande)
+                    );
+                } catch (\Exception $e) {
+                    \Log::error("Erreur notification admin nouvelle commande", ['error' => $e->getMessage()]);
+                }
+            }
         });
 
         return response()->json(['success' => true]);

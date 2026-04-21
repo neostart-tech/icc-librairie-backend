@@ -59,6 +59,10 @@ class LivreController extends Controller
             'is_vogue' => 'nullable|boolean',
         ]);
 
+        if ($request->is_vogue) {
+            Livre::where('is_vogue', true)->update(['is_vogue' => false]);
+        }
+
         $livre = Livre::create($request->only([
             'titre',
             'auteur',
@@ -107,6 +111,10 @@ class LivreController extends Controller
             'is_selection_mois_precedent' => 'nullable|boolean',
             'is_vogue' => 'nullable|boolean',
         ]);
+
+        if ($request->is_vogue) {
+            Livre::where('id', '!=', $livre->id)->update(['is_vogue' => false]);
+        }
 
         $livre->update($request->only([
             'titre',

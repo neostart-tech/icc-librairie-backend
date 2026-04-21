@@ -5,7 +5,7 @@
     
     <p>La commande <strong>#{{ $commande->reference }}</strong> a été marquée comme traitée.</p>
     
-    <div style="background-color: #f0fdf4; border-left: 4px solid #166534; padding: 20px; margin: 25px 0;">
+    <div style="background-color: #f8fafc; border-left: 4px solid #6a0d5f; padding: 20px; margin: 25px 0;">
         <p style="margin: 5px 0;"><strong>Référence :</strong> #{{ $commande->reference }}</p>
         <p style="margin: 5px 0;"><strong>Client :</strong> {{ $commande->user->nom }} {{ $commande->user->prenom }}</p>
         <p style="margin: 5px 0;"><strong>Statut :</strong> Traitée</p>

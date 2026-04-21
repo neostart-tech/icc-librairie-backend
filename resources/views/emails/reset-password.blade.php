@@ -41,7 +41,7 @@
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background-color: #f97316; /* Orange color */
+            background-color: #6a0d5f; /* Violet color */
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 6px;
@@ -84,7 +84,7 @@
         <p>Si vous n'avez pas demandé de réinitialisation de mot de passe, aucune action supplémentaire n'est requise.</p>
         
         <p class="note">Si vous avez des difficultés à cliquer sur le bouton "Réinitialiser le mot de passe", copiez et collez l'URL ci-dessous dans votre navigateur :<br>
-        <span style="word-break: break-all; color: #f97316;">{{ $resetUrl }}</span></p>
+        <span style="word-break: break-all; color: #6a0d5f;">{{ $resetUrl }}</span></p>
 
         <div class="footer">
             <p>&copy; {{ date('Y') }} ICC Librairie. Tous droits réservés.</p>

@@ -73,7 +73,7 @@
         .btn {
             display: inline-block;
             padding: 14px 28px;
-            background-color: #f97316;
+            background-color: #6a0d5f;
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 8px;
@@ -88,7 +88,8 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        .badge-success { background-color: #dcfce7; color: #166534; }
+        .badge-success { background-color: #f5f3ff; color: #6a0d5f; }
+        .badge-primary { background-color: #6a0d5f; color: #ffffff; }
         .badge-warning { background-color: #fef9c3; color: #854d0e; }
     </style>
 </head>

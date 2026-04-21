@@ -46,6 +46,7 @@ Route::get('/categories/{categorie}', [CategorieController::class, 'show']);
 
 // Livres
 Route::get('/livres', [LivreController::class, 'index']);
+Route::get('/livres/featured', [LivreController::class, 'getFeatured']);
 Route::get('/livres/{livre}', [LivreController::class, 'show']);
 
 // Stocks

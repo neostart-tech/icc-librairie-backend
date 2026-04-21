@@ -25,6 +25,9 @@ class LivreResource extends JsonResource
             'id_auteur' => $this->id_auteur,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_selection_mois' => (bool)$this->is_selection_mois,
+            'is_selection_mois_precedent' => (bool)$this->is_selection_mois_precedent,
+            'is_vogue' => (bool)$this->is_vogue,
 
             'categorie' => new CategorieResource($this->whenLoaded('categorie')),
             'auteurRel' => new AuteurResource($this->whenLoaded('auteurRel')),

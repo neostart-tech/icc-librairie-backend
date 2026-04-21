@@ -9,6 +9,7 @@ use App\Http\Controllers\gateways\GatewayController;
 use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\auteurs\AuteurController;
 use App\Http\Controllers\banners\BannerController;
+use App\Http\Controllers\popups\PopupController;
 use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
 use App\Http\Controllers\stocks\StockController;
@@ -69,8 +70,10 @@ Route::post('/paiements/callback', [PaiementController::class, 'callback'])
 //Gateways
 Route::get('/gateways', [GatewayController::class, 'index']);
 
-// Banners (Public)
 Route::get('/banners/actives', [BannerController::class, 'actives']);
+
+// Popups (Public)
+Route::get('/popups/active', [PopupController::class, 'active']);
 
 
 // Routes nécessitant une authentification
@@ -104,6 +107,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{banner}', [BannerController::class, 'show']);
         Route::post('/{banner}', [BannerController::class, 'update']); // Use POST because of form-data image upload in Laravel
         Route::delete('/{banner}', [BannerController::class, 'destroy']);
+    })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Popups (Admin)
+    Route::prefix('/popups')->group(function () {
+        Route::get('/', [PopupController::class, 'index']);
+        Route::post('/', [PopupController::class, 'store']);
+        Route::get('/{popup}', [PopupController::class, 'show']);
+        Route::post('/{popup}', [PopupController::class, 'update']);
+        Route::delete('/{popup}', [PopupController::class, 'destroy']);
     })->middleware(IsAdminOrSuperAdmin::class);
 
     // Gestion du stock

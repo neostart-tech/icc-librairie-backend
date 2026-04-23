@@ -185,6 +185,11 @@ Route::middleware('auth:sanctum')->group(function () {
             $request->user()->notifications()->findOrFail($id)->markAsRead();
         });
 
+        Route::delete('/', function (Request $request) {
+            $request->user()->notifications()->delete();
+            return response()->noContent();
+        });
+
         Route::delete('/{id}', function ($id, Request $request) {
             $notification = $request->user()
                 ->notifications()

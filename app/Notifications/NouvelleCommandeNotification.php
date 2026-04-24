@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NouvelleCommandeNotification extends Notification
+class NouvelleCommandeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -20,7 +20,7 @@ class NouvelleCommandeNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -29,9 +29,10 @@ class NouvelleCommandeNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('Nouvelle Commande Reçue - ICC Librairie')
+            ->view('emails.new-order-admin', [
+                'commande' => $this->commande,
+            ]);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Mail\AdminPromotionMail;
 use App\Mail\UserPasswordGenerated;
 use App\Models\Role;
 use App\Models\User;
@@ -148,9 +149,23 @@ class UtilisateurController extends Controller
 
         $adminRole = Role::where('role', 'admin')->firstOrFail();
 
+        if ($user->role_id === $adminRole->id) {
+            return response()->json([
+                'message' => 'L\'utilisateur est déjà administrateur',
+                'data' => new UserResource($user->load('role'))
+            ]);
+        }
+
         $user->update([
             'role_id' => $adminRole->id
         ]);
+
+        // Envoyer l'email de promotion
+        try {
+            Mail::to($user->email)->send(new AdminPromotionMail($user));
+        } catch (\Exception $e) {
+            \Log::error("Erreur envoi mail promotion admin", ['error' => $e->getMessage()]);
+        }
 
         return response()->json([
             'message' => 'Utilisateur promu administrateur',

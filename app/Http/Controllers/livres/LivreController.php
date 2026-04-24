@@ -4,6 +4,7 @@ namespace App\Http\Controllers\livres;
 
 use App\Http\Controllers\Controller;
 use App\Models\Livre;
+use App\Http\Resources\LivreResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,10 +18,11 @@ class LivreController extends Controller
         $livres = Livre::with([
             'images',
             'stock',
-            'categorie'
+            'categorie',
+            'auteurRel'
         ])->latest()->get();
 
-        return response()->json($livres);
+        return LivreResource::collection($livres);
     }
 
     /**
@@ -31,10 +33,11 @@ class LivreController extends Controller
         $livre->load([
             'images',
             'stock',
-            'categorie'
+            'categorie',
+            'auteurRel'
         ]);
 
-        return response()->json($livre);
+        return new LivreResource($livre);
     }
 
     /**
@@ -42,7 +45,6 @@ class LivreController extends Controller
      */
     public function store(Request $request)
     {
-
         $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -50,8 +52,16 @@ class LivreController extends Controller
             'prix' => 'required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'required|exists:categories,id',
+            'id_auteur' => 'nullable|exists:auteurs,id',
             'images.*' => 'nullable|image|max:4096',
+            'is_selection_mois' => 'nullable|boolean',
+            'is_selection_mois_precedent' => 'nullable|boolean',
+            'is_vogue' => 'nullable|boolean',
         ]);
+
+        if ($request->is_vogue) {
+            Livre::where('is_vogue', true)->update(['is_vogue' => false]);
+        }
 
         $livre = Livre::create($request->only([
             'titre',
@@ -59,7 +69,11 @@ class LivreController extends Controller
             'description',
             'prix',
             'prix_promo',
-            'categorie_id'
+            'categorie_id',
+            'id_auteur',
+            'is_selection_mois',
+            'is_selection_mois_precedent',
+            'is_vogue'
         ]));
 
         // Upload images
@@ -73,10 +87,10 @@ class LivreController extends Controller
             }
         }
 
-        return response()->json(
-            $livre->load(['images', 'stock', 'categorie']),
-            201
-        );
+        return response()->json([
+            'message' => 'Livre créé avec succès',
+            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+        ], 201);
     }
 
     /*
@@ -84,7 +98,6 @@ class LivreController extends Controller
      */
     public function update(Request $request, Livre $livre)
     {
-
         $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -92,8 +105,16 @@ class LivreController extends Controller
             'prix' => 'sometimes|required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'sometimes|required|exists:categories,id',
+            'id_auteur' => 'nullable|exists:auteurs,id',
             'images.*' => 'nullable|image|max:4096',
+            'is_selection_mois' => 'nullable|boolean',
+            'is_selection_mois_precedent' => 'nullable|boolean',
+            'is_vogue' => 'nullable|boolean',
         ]);
+
+        if ($request->is_vogue) {
+            Livre::where('id', '!=', $livre->id)->update(['is_vogue' => false]);
+        }
 
         $livre->update($request->only([
             'titre',
@@ -101,7 +122,11 @@ class LivreController extends Controller
             'description',
             'prix',
             'prix_promo',
-            'categorie_id'
+            'categorie_id',
+            'id_auteur',
+            'is_selection_mois',
+            'is_selection_mois_precedent',
+            'is_vogue'
         ]));
 
         // Ajouter nouvelles images
@@ -115,9 +140,10 @@ class LivreController extends Controller
             }
         }
 
-        return response()->json(
-            $livre->load(['images', 'stock', 'categorie'])
-        );
+        return response()->json([
+            'message' => 'Livre mis à jour avec succès',
+            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+        ]);
     }
 
     /**
@@ -125,7 +151,6 @@ class LivreController extends Controller
      */
     public function destroy(Livre $livre)
     {
-
         // Supprimer les images physiques
         foreach ($livre->images as $image) {
             Storage::disk('public')->delete($image->path);
@@ -136,6 +161,30 @@ class LivreController extends Controller
         $livre->delete();
         return response()->json([
             'message' => 'Livre supprimé avec succès'
+        ]);
+    }
+
+    /**
+     *  Récupérer les livres mis en avant (mois, mois précédent, vogue)
+     */
+    public function getFeatured()
+    {
+        $selection_mois = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+            ->where('is_selection_mois', true)
+            ->get();
+
+        $selection_mois_precedent = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+            ->where('is_selection_mois_precedent', true)
+            ->get();
+
+        $en_vogue = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+            ->where('is_vogue', true)
+            ->first(); // On n'en prend qu'un pour "Livre en vogue"
+
+        return response()->json([
+            'selection_mois' => LivreResource::collection($selection_mois),
+            'selection_mois_precedent' => LivreResource::collection($selection_mois_precedent),
+            'en_vogue' => $en_vogue ? new LivreResource($en_vogue) : null
         ]);
     }
 }

@@ -7,6 +7,9 @@ use App\Http\Controllers\categories\CategorieController;
 use App\Http\Controllers\commandes\CommandeController;
 use App\Http\Controllers\gateways\GatewayController;
 use App\Http\Controllers\livres\LivreController;
+use App\Http\Controllers\auteurs\AuteurController;
+use App\Http\Controllers\banners\BannerController;
+use App\Http\Controllers\popups\PopupController;
 use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
 use App\Http\Controllers\stocks\StockController;
@@ -44,11 +47,16 @@ Route::get('/categories/{categorie}', [CategorieController::class, 'show']);
 
 // Livres
 Route::get('/livres', [LivreController::class, 'index']);
+Route::get('/livres/featured', [LivreController::class, 'getFeatured']);
 Route::get('/livres/{livre}', [LivreController::class, 'show']);
 
 // Stocks
 Route::get('/stocks', [StockController::class, 'index']);
 Route::get('/stocks/{livre}', [StockController::class, 'show']);
+
+// Auteurs
+Route::get('/auteurs', [AuteurController::class, 'index']);
+Route::get('/auteurs/{auteur}', [AuteurController::class, 'show']);
 
 Route::get('list-orders', function () {
     $service = new \App\Services\CashPayService();
@@ -61,6 +69,11 @@ Route::post('/paiements/callback', [PaiementController::class, 'callback'])
 
 //Gateways
 Route::get('/gateways', [GatewayController::class, 'index']);
+
+Route::get('/banners/actives', [BannerController::class, 'actives']);
+
+// Popups (Public)
+Route::get('/popups/active', [PopupController::class, 'active']);
 
 
 // Routes nécessitant une authentification
@@ -78,6 +91,31 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [LivreController::class, 'store']);
         Route::put('/{livre}', [LivreController::class, 'update']);
         Route::delete('/{livre}', [LivreController::class, 'destroy']);
+    })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Auteurs
+    Route::prefix('/auteurs')->group(function () {
+        Route::post('/', [AuteurController::class, 'store']);
+        Route::put('/{auteur}', [AuteurController::class, 'update']);
+        Route::delete('/{auteur}', [AuteurController::class, 'destroy']);
+    })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Banners (Admin)
+    Route::prefix('/banners')->group(function () {
+        Route::get('/', [BannerController::class, 'index']);
+        Route::post('/', [BannerController::class, 'store']);
+        Route::get('/{banner}', [BannerController::class, 'show']);
+        Route::post('/{banner}', [BannerController::class, 'update']); // Use POST because of form-data image upload in Laravel
+        Route::delete('/{banner}', [BannerController::class, 'destroy']);
+    })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Popups (Admin)
+    Route::prefix('/popups')->group(function () {
+        Route::get('/', [PopupController::class, 'index']);
+        Route::post('/', [PopupController::class, 'store']);
+        Route::get('/{popup}', [PopupController::class, 'show']);
+        Route::post('/{popup}', [PopupController::class, 'update']);
+        Route::delete('/{popup}', [PopupController::class, 'destroy']);
     })->middleware(IsAdminOrSuperAdmin::class);
 
     // Gestion du stock
@@ -145,6 +183,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/{id}/read', function ($id, Request $request) {
             $request->user()->notifications()->findOrFail($id)->markAsRead();
+        });
+
+        Route::delete('/', function (Request $request) {
+            $request->user()->notifications()->delete();
+            return response()->noContent();
         });
 
         Route::delete('/{id}', function ($id, Request $request) {

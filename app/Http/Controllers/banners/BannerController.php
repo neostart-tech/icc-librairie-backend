@@ -36,16 +36,18 @@ class BannerController extends Controller
         $request->validate([
             'image' => 'required|image|max:4096',
             'title' => 'nullable|string|max:255',
-            'order' => 'required|integer|unique:banners,order',
+            'order' => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);
 
         $path = $request->file('image')->store('banners', 'public');
 
+        $order = $request->order ?? (Banner::max('order') + 1);
+
         $banner = Banner::create([
             'image_path' => $path,
             'title' => $request->title,
-            'order' => $request->order ?? 0,
+            'order' => $order,
             'is_active' => $request->is_active ?? true,
         ]);
 

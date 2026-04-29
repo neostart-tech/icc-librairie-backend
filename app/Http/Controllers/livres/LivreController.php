@@ -16,7 +16,6 @@ class LivreController extends Controller
     public function index()
     {
         $livres = Livre::with([
-            'images',
             'stock',
             'categorie',
             'auteurRel'
@@ -31,7 +30,6 @@ class LivreController extends Controller
     public function show(Livre $livre)
     {
         $livre->load([
-            'images',
             'stock',
             'categorie',
             'auteurRel'
@@ -53,7 +51,7 @@ class LivreController extends Controller
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
-            'images.*' => 'nullable|image|max:4096',
+            'image' => 'nullable|image|max:4096',
             'is_selection_mois' => 'nullable|boolean',
             'is_selection_mois_precedent' => 'nullable|boolean',
             'is_vogue' => 'nullable|boolean',
@@ -63,7 +61,7 @@ class LivreController extends Controller
             Livre::where('is_vogue', true)->update(['is_vogue' => false]);
         }
 
-        $livre = Livre::create($request->only([
+        $livreData = $request->only([
             'titre',
             'auteur',
             'description',
@@ -74,33 +72,24 @@ class LivreController extends Controller
             'is_selection_mois',
             'is_selection_mois_precedent',
             'is_vogue'
-        ]));
+        ]);
 
-        // Upload images
-        if ($request->hasFile('images')) {
-            $files = $request->file('images');
-
-            // On s'assure d'avoir un tableau même si un seul fichier est reçu
-            if (!is_array($files)) {
-                $files = [$files];
-            }
-            foreach ($files as $file) {
-                if ($file->isValid()) {
-                    $path = $file->store('livres', 'public');
-
-                    // On vérifie que $path n'est pas vide ou faux
-                    if ($path) {
-                        $livre->images()->create([
-                            'path' => (string) $path
-                        ]);
-                    }
+        // Upload image
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            if ($file->isValid()) {
+                $path = $file->store('livres', 'public');
+                if ($path) {
+                    $livreData['image'] = (string) $path;
                 }
             }
         }
 
+        $livre = Livre::create($livreData);
+
         return response()->json([
             'message' => 'Livre créé avec succès',
-            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+            'data' => new LivreResource($livre->load(['stock', 'categorie', 'auteurRel']))
         ], 201);
     }
 
@@ -117,7 +106,7 @@ class LivreController extends Controller
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'sometimes|required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
-            'images.*' => 'nullable|image|max:4096',
+            'image' => 'nullable|image|max:4096',
             'is_selection_mois' => 'nullable|boolean',
             'is_selection_mois_precedent' => 'nullable|boolean',
             'is_vogue' => 'nullable|boolean',
@@ -127,7 +116,7 @@ class LivreController extends Controller
             Livre::where('id', '!=', $livre->id)->update(['is_vogue' => false]);
         }
 
-        $livre->update($request->only([
+        $livreData = $request->only([
             'titre',
             'auteur',
             'description',
@@ -138,33 +127,29 @@ class LivreController extends Controller
             'is_selection_mois',
             'is_selection_mois_precedent',
             'is_vogue'
-        ]));
+        ]);
 
-        // Ajouter nouvelles images
-        if ($request->hasFile('images')) {
-            $files = $request->file('images');
-
-            // On s'assure d'avoir un tableau même si un seul fichier est reçu
-            if (!is_array($files)) {
-                $files = [$files];
+        // Update image
+        if ($request->hasFile('image')) {
+            // Delete old image
+            if ($livre->image) {
+                Storage::disk('public')->delete($livre->image);
             }
-            foreach ($files as $file) {
-                if ($file->isValid()) {
-                    $path = $file->store('livres', 'public');
 
-                    // On vérifie que $path n'est pas vide ou faux
-                    if ($path) {
-                        $livre->images()->create([
-                            'path' => (string) $path
-                        ]);
-                    }
+            $file = $request->file('image');
+            if ($file->isValid()) {
+                $path = $file->store('livres', 'public');
+                if ($path) {
+                    $livreData['image'] = (string) $path;
                 }
             }
         }
 
+        $livre->update($livreData);
+
         return response()->json([
             'message' => 'Livre mis à jour avec succès',
-            'data' => new LivreResource($livre->load(['images', 'stock', 'categorie', 'auteurRel']))
+            'data' => new LivreResource($livre->load(['stock', 'categorie', 'auteurRel']))
         ]);
     }
 
@@ -176,10 +161,9 @@ class LivreController extends Controller
         try {
             \DB::beginTransaction();
 
-            // Supprimer les images physiques et records
-            foreach ($livre->images as $image) {
-                Storage::disk('public')->delete($image->path);
-                $image->delete();
+            // Supprimer l'image physique
+            if ($livre->image) {
+                Storage::disk('public')->delete($livre->image);
             }
 
             // Supprimer le stock associé
@@ -213,15 +197,15 @@ class LivreController extends Controller
      */
     public function getFeatured()
     {
-        $selection_mois = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+        $selection_mois = Livre::with(['stock', 'categorie', 'auteurRel'])
             ->where('is_selection_mois', true)
             ->get();
 
-        $selection_mois_precedent = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+        $selection_mois_precedent = Livre::with(['stock', 'categorie', 'auteurRel'])
             ->where('is_selection_mois_precedent', true)
             ->get();
 
-        $en_vogue = Livre::with(['images', 'stock', 'categorie', 'auteurRel'])
+        $en_vogue = Livre::with(['stock', 'categorie', 'auteurRel'])
             ->where('is_vogue', true)
             ->first(); // On n'en prend qu'un pour "Livre en vogue"
 

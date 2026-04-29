@@ -28,10 +28,10 @@ class LivreResource extends JsonResource
             'is_selection_mois' => (bool)$this->is_selection_mois,
             'is_selection_mois_precedent' => (bool)$this->is_selection_mois_precedent,
             'is_vogue' => (bool)$this->is_vogue,
+            'image' => $this->image,
 
             'categorie' => new CategorieResource($this->whenLoaded('categorie')),
             'auteurRel' => new AuteurResource($this->whenLoaded('auteurRel')),
-            'images' => ImageResource::collection($this->whenLoaded('images')),
             'stock' => new StockResource($this->whenLoaded('stock')),
             'stockMouvements' => StockMouvementResource::collection($this->whenLoaded('stockMouvements')),
         ];

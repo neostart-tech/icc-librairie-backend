@@ -89,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Livres
     Route::prefix('/livres')->group(function () {
         Route::post('/', [LivreController::class, 'store']);
-        Route::put('/{livre}', [LivreController::class, 'update']);
+        Route::post('/{livre}', [LivreController::class, 'update']);
         Route::delete('/{livre}', [LivreController::class, 'destroy']);
     })->middleware(IsAdminOrSuperAdmin::class);
 

@@ -46,4 +46,9 @@ class Livre extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function detailCommandes()
+    {
+        return $this->hasMany(DetailCommande::class);
+    }
 }

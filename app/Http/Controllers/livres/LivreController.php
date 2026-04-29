@@ -173,17 +173,39 @@ class LivreController extends Controller
      */
     public function destroy(Livre $livre)
     {
-        // Supprimer les images physiques
-        foreach ($livre->images as $image) {
-            Storage::disk('public')->delete($image->path);
-            $image->delete();
-        }
+        try {
+            \DB::beginTransaction();
 
-        // Supprimer livre
-        $livre->delete();
-        return response()->json([
-            'message' => 'Livre supprimé avec succès'
-        ]);
+            // Supprimer les images physiques et records
+            foreach ($livre->images as $image) {
+                Storage::disk('public')->delete($image->path);
+                $image->delete();
+            }
+
+            // Supprimer le stock associé
+            $livre->stock()->delete();
+
+            // Supprimer les mouvements de stock associés
+            $livre->stockMouvements()->delete();
+
+            // Supprimer les détails de commandes (pour éviter l'erreur de contrainte)
+            $livre->detailCommandes()->delete();
+
+            // Supprimer le livre
+            $livre->delete();
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Livre supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la suppression',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

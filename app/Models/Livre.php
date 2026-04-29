@@ -13,6 +13,7 @@ class Livre extends Model
         'titre', 
         'auteur', 
         'id_auteur', 
+        'image',
         'description', 
         'prix', 
         'prix_promo', 
@@ -40,11 +41,6 @@ class Livre extends Model
     public function stockMouvements()
     {
         return $this->hasMany(StockMouvement::class);
-    }
-
-    public function images()
-    {
-        return $this->hasMany(Image::class);
     }
 
     public function detailCommandes()

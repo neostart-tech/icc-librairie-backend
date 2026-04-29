@@ -78,12 +78,23 @@ class LivreController extends Controller
 
         // Upload images
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('livres', 'public');
+            $files = $request->file('images');
 
-                $livre->images()->create([
-                    'path' => $path
-                ]);
+            // On s'assure d'avoir un tableau même si un seul fichier est reçu
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+            foreach ($files as $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('livres', 'public');
+
+                    // On vérifie que $path n'est pas vide ou faux
+                    if ($path) {
+                        $livre->images()->create([
+                            'path' => (string) $path
+                        ]);
+                    }
+                }
             }
         }
 
@@ -131,12 +142,23 @@ class LivreController extends Controller
 
         // Ajouter nouvelles images
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('livres', 'public');
+            $files = $request->file('images');
 
-                $livre->images()->create([
-                    'path' => $path
-                ]);
+            // On s'assure d'avoir un tableau même si un seul fichier est reçu
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+            foreach ($files as $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('livres', 'public');
+
+                    // On vérifie que $path n'est pas vide ou faux
+                    if ($path) {
+                        $livre->images()->create([
+                            'path' => (string) $path
+                        ]);
+                    }
+                }
             }
         }
 

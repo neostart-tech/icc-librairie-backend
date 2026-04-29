@@ -43,6 +43,8 @@ class LivreController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info($request->all());
+
         $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -69,6 +71,7 @@ class LivreController extends Controller
             'prix_promo',
             'categorie_id',
             'id_auteur',
+            'image',
             'is_selection_mois',
             'is_selection_mois_precedent',
             'is_vogue'
@@ -98,6 +101,8 @@ class LivreController extends Controller
      */
     public function update(Request $request, Livre $livre)
     {
+        \Log::info($request->all());
+
         $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'auteur' => 'nullable|string|max:255',
@@ -124,6 +129,7 @@ class LivreController extends Controller
             'prix_promo',
             'categorie_id',
             'id_auteur',
+            'image',
             'is_selection_mois',
             'is_selection_mois_precedent',
             'is_vogue'

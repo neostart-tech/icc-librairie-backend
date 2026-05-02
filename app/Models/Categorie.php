@@ -9,7 +9,7 @@ class Categorie extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['libelle', 'description'];
+    protected $fillable = ['libelle', 'description', 'order'];
 
     public function livres()
     {

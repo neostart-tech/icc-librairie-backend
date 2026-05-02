@@ -8,6 +8,7 @@ use App\Http\Controllers\commandes\CommandeController;
 use App\Http\Controllers\gateways\GatewayController;
 use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\auteurs\AuteurController;
+
 use App\Http\Controllers\banners\BannerController;
 use App\Http\Controllers\popups\PopupController;
 use App\Http\Controllers\Paiements\PaiementController;
@@ -81,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Categories
     Route::prefix('/categories')->group(function () {
+        Route::post('/reorder', [CategorieController::class, 'reorder']);
         Route::post('/', [CategorieController::class, 'store']);
         Route::put('/{categorie}', [CategorieController::class, 'update']);
         Route::delete('/{categorie}', [CategorieController::class, 'destroy']);
@@ -89,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Livres
     Route::prefix('/livres')->group(function () {
         Route::post('/', [LivreController::class, 'store']);
+        Route::post('/reorder-featured', [LivreController::class, 'reorderFeatured']);
         Route::post('/{livre}', [LivreController::class, 'update']);
         Route::delete('/{livre}', [LivreController::class, 'destroy']);
     })->middleware(IsAdminOrSuperAdmin::class);
@@ -103,11 +106,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Banners (Admin)
     Route::prefix('/banners')->group(function () {
         Route::get('/', [BannerController::class, 'index']);
+        Route::post('/reorder', [BannerController::class, 'reorder']);
         Route::post('/', [BannerController::class, 'store']);
         Route::get('/{banner}', [BannerController::class, 'show']);
-        Route::post('/{banner}', [BannerController::class, 'update']); // Use POST because of form-data image upload in Laravel
+        Route::post('/{banner}', [BannerController::class, 'update']);
         Route::delete('/{banner}', [BannerController::class, 'destroy']);
     })->middleware(IsAdminOrSuperAdmin::class);
+
+
 
     // Popups (Admin)
     Route::prefix('/popups')->group(function () {

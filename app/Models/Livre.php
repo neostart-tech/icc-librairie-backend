@@ -18,9 +18,10 @@ class Livre extends Model
         'prix', 
         'prix_promo', 
         'categorie_id',
-        'is_selection_mois',
-        'is_selection_mois_precedent',
-        'is_vogue'
+        'is_selection_annee',
+        'is_livre_du_mois',
+        'is_livre_duo',
+        'featured_order'
     ];
 
     public function categorie()

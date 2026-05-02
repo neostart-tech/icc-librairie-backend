@@ -18,6 +18,7 @@ class CategorieResource extends JsonResource
             'id' => $this->id,
             'libelle' => $this->libelle,
             'description' => $this->description,
+            'order' => $this->order,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 

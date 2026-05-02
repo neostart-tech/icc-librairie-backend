@@ -111,4 +111,24 @@ class BannerController extends Controller
             'message' => 'Bannière supprimée avec succès'
         ]);
     }
+
+    /**
+     * Mettre à jour l'ordre des bannières
+     */
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|exists:banners,id',
+            'orders.*.order' => 'required|integer',
+        ]);
+
+        foreach ($request->orders as $order) {
+            Banner::where('id', $order['id'])->update(['order' => $order['order']]);
+        }
+
+        return response()->json([
+            'message' => 'Ordre des bannières mis à jour'
+        ]);
+    }
 }

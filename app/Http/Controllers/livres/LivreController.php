@@ -54,28 +54,33 @@ class LivreController extends Controller
             'categorie_id' => 'required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
             'image' => 'nullable|image|max:4096',
-            'is_selection_mois' => 'nullable|boolean',
-            'is_selection_mois_precedent' => 'nullable|boolean',
-            'is_vogue' => 'nullable|boolean',
+            'is_selection_annee' => 'nullable|boolean',
+            'is_livre_du_mois' => 'nullable|boolean',
+            'is_livre_duo' => 'nullable|boolean',
+            'featured_order' => 'nullable|integer',
         ]);
 
-        if ($request->is_vogue) {
-            Livre::where('is_vogue', true)->update(['is_vogue' => false]);
+        $livreData = [
+            'titre' => $request->titre,
+            'auteur' => $request->auteur,
+            'description' => $request->description,
+            'prix' => $request->prix,
+            'prix_promo' => $request->prix_promo,
+            'categorie_id' => $request->categorie_id,
+            'id_auteur' => $request->id_auteur,
+            'is_selection_annee' => $request->boolean('is_selection_annee'),
+            'is_livre_du_mois' => $request->boolean('is_livre_du_mois'),
+            'is_livre_duo' => $request->boolean('is_livre_duo'),
+            'featured_order' => $request->integer('featured_order', 0),
+        ];
+
+        if ($request->boolean('is_livre_du_mois')) {
+            Livre::query()->update(['is_livre_du_mois' => false]);
         }
 
-        $livreData = $request->only([
-            'titre',
-            'auteur',
-            'description',
-            'prix',
-            'prix_promo',
-            'categorie_id',
-            'id_auteur',
-            'image',
-            'is_selection_mois',
-            'is_selection_mois_precedent',
-            'is_vogue'
-        ]);
+        if ($request->boolean('is_livre_duo')) {
+            Livre::query()->update(['is_livre_duo' => false]);
+        }
 
         // Upload image
         if ($request->hasFile('image')) {
@@ -112,13 +117,18 @@ class LivreController extends Controller
             'categorie_id' => 'sometimes|required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
             'image' => 'nullable|image|max:4096',
-            'is_selection_mois' => 'nullable|boolean',
-            'is_selection_mois_precedent' => 'nullable|boolean',
-            'is_vogue' => 'nullable|boolean',
+            'is_selection_annee' => 'nullable|boolean',
+            'is_livre_du_mois' => 'nullable|boolean',
+            'is_livre_duo' => 'nullable|boolean',
+            'featured_order' => 'nullable|integer',
         ]);
 
-        if ($request->is_vogue) {
-            Livre::where('id', '!=', $livre->id)->update(['is_vogue' => false]);
+        if ($request->has('is_livre_du_mois') && $request->boolean('is_livre_du_mois')) {
+            Livre::where('id', '!=', $livre->id)->update(['is_livre_du_mois' => false]);
+        }
+
+        if ($request->has('is_livre_duo') && $request->boolean('is_livre_duo')) {
+            Livre::where('id', '!=', $livre->id)->update(['is_livre_duo' => false]);
         }
 
         $livreData = $request->only([
@@ -130,10 +140,12 @@ class LivreController extends Controller
             'categorie_id',
             'id_auteur',
             'image',
-            'is_selection_mois',
-            'is_selection_mois_precedent',
-            'is_vogue'
         ]);
+
+        if ($request->has('is_selection_annee')) $livreData['is_selection_annee'] = $request->boolean('is_selection_annee');
+        if ($request->has('is_livre_du_mois')) $livreData['is_livre_du_mois'] = $request->boolean('is_livre_du_mois');
+        if ($request->has('is_livre_duo')) $livreData['is_livre_duo'] = $request->boolean('is_livre_duo');
+        if ($request->has('featured_order')) $livreData['featured_order'] = $request->integer('featured_order');
 
         // Update image
         if ($request->hasFile('image')) {
@@ -203,22 +215,43 @@ class LivreController extends Controller
      */
     public function getFeatured()
     {
-        $selection_mois = Livre::with(['stock', 'categorie', 'auteurRel'])
-            ->where('is_selection_mois', true)
+        $selection_annee = Livre::with(['stock', 'categorie', 'auteurRel'])
+            ->where('is_selection_annee', true)
+            ->orderBy('featured_order', 'asc')
             ->get();
 
-        $selection_mois_precedent = Livre::with(['stock', 'categorie', 'auteurRel'])
-            ->where('is_selection_mois_precedent', true)
-            ->get();
+        $livre_du_mois = Livre::with(['stock', 'categorie', 'auteurRel'])
+            ->where('is_livre_du_mois', true)
+            ->first();
 
-        $en_vogue = Livre::with(['stock', 'categorie', 'auteurRel'])
-            ->where('is_vogue', true)
-            ->first(); // On n'en prend qu'un pour "Livre en vogue"
+        $livre_duo = Livre::with(['stock', 'categorie', 'auteurRel'])
+            ->where('is_livre_duo', true)
+            ->first();
 
         return response()->json([
-            'selection_mois' => LivreResource::collection($selection_mois),
-            'selection_mois_precedent' => LivreResource::collection($selection_mois_precedent),
-            'en_vogue' => $en_vogue ? new LivreResource($en_vogue) : null
+            'selection_annee' => LivreResource::collection($selection_annee),
+            'livre_du_mois' => $livre_du_mois ? new LivreResource($livre_du_mois) : null,
+            'livre_duo' => $livre_duo ? new LivreResource($livre_duo) : null
+        ]);
+    }
+
+    /**
+     *  Mettre à jour l'ordre des livres mis en avant
+     */
+    public function reorderFeatured(Request $request)
+    {
+        $request->validate([
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|exists:livres,id',
+            'orders.*.featured_order' => 'required|integer',
+        ]);
+
+        foreach ($request->orders as $order) {
+            Livre::where('id', $order['id'])->update(['featured_order' => $order['featured_order']]);
+        }
+
+        return response()->json([
+            'message' => 'Ordre mis à jour avec succès'
         ]);
     }
 }

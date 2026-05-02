@@ -166,7 +166,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [CommandeController::class, 'index']);
         Route::get('/all', [CommandeController::class, 'allOrders'])->middleware(IsAdminOrSuperAdmin::class);
         Route::get('/{commande}', [CommandeController::class, 'show']);
-        Route::put('/{commande}/traiter', [CommandeController::class, 'traiterCommande']);
+        Route::post('/{commande}/declarer-paiement', [CommandeController::class, 'declarerPaiement']);
+        
+        // Admin
+        Route::middleware(IsAdminOrSuperAdmin::class)->group(function() {
+            Route::post('/{commande}/valider-paiement', [CommandeController::class, 'validerPaiement']);
+            Route::post('/{commande}/refuser-paiement', [CommandeController::class, 'refuserPaiement']);
+            Route::post('/{commande}/finaliser', [CommandeController::class, 'finaliserCommande']);
+            Route::post('/vente-comptoir', [CommandeController::class, 'venteComptoir']);
+        });
     });
 
     //Paiements
@@ -206,5 +214,18 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->noContent();
         });
     })->middleware(IsAdminOrSuperAdmin::class);
+
+    //Settings
+    Route::prefix('/settings')->group(function () {
+        Route::get('/', function() {
+            return response()->json(\App\Models\Setting::all()->pluck('value', 'key'));
+        });
+        Route::post('/', function(Illuminate\Http\Request $request) {
+            foreach($request->all() as $key => $value) {
+                \App\Models\Setting::set($key, $value);
+            }
+            return response()->json(['message' => 'Settings updated']);
+        })->middleware(IsAdminOrSuperAdmin::class);
+    });
 
 });

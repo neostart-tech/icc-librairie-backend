@@ -97,7 +97,7 @@
     <div class="container">
         <div class="header">
             @if(file_exists(public_path('logo-icc.jpg')))
-                <img src="{{ $message->embed(public_path('logo-icc.jpg')) }}" alt="Logo ICC">
+                <img src="{{ $message->embed(public_path('logo-icc.jpg')) }}" class="brightness-0 invert" alt="Logo ICC">
             @endif
             <h1>{{ $headerTitle ?? 'ICC Librairie' }}</h1>
         </div>

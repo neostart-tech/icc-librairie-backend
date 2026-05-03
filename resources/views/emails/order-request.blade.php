@@ -13,7 +13,7 @@
 
     <p>Pour valider votre commande, veuillez suivre les instructions de paiement affichées sur le site et déclarer votre paiement dans votre espace client.</p>
     
-    <div style="text-align: center; margin-top: 30px;">
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
         <a href="{{ config('app.client_url') }}/dashboard/commandes" style="background-color: #6a0d5f; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Voir ma commande</a>
     </div>
 

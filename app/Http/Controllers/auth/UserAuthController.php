@@ -23,8 +23,8 @@ class UserAuthController extends Controller
         $validator = Validator::make($request->all(), [
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'telephone' => 'nullable|string|max:30|unique:users',
+            'email' => 'required_without:telephone|nullable|string|email|max:255|unique:users',
+            'telephone' => 'required_without:email|nullable|string|max:30|unique:users',
             'password' => 'required|string|min:8|',
         ]);
 
@@ -44,12 +44,12 @@ class UserAuthController extends Controller
             'role_id' => $role->id,
         ]);
 
-        // Envoyer email de verification
-        // event(new Registered($user));
+        $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
             'message' => 'Utilisateur créé avec succès.',
-            'user' => new UserResource($user),
+            'token' => $token,
+            'user' => new UserResource($user->load(['role', 'commandes'])),
         ]);
     }
 
@@ -59,7 +59,7 @@ class UserAuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email' => 'required|string',
             'password' => 'required|string',
         ]);
 
@@ -68,6 +68,7 @@ class UserAuthController extends Controller
         }
 
         $user = User::where('email', $request->input('email'))
+            ->orWhere('telephone', $request->input('email'))
             ->with(['role', 'commandes'])
             ->first();
 
@@ -175,7 +176,7 @@ class UserAuthController extends Controller
     public function login_sso(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email' => 'required|string',
             'password' => 'required|string',
         ]);
 
@@ -225,7 +226,7 @@ class UserAuthController extends Controller
         // Données utilisateur venant du dépôt
         $userData = $response->json('user');
 
-        if (!$userData || !isset($userData['email'])) {
+        if (!$userData || (!isset($userData['email']) && !isset($userData['telephone']))) {
             return response()->json([
                 'message' => 'Réponse SSO invalide',
                 'sso_response' => $response->json(),
@@ -233,7 +234,14 @@ class UserAuthController extends Controller
         }
 
         // Vérifier ou créer l'utilisateur local
-        $user = User::where('email', $userData['email'])->first();
+        $user = User::where(function ($query) use ($userData) {
+            if (!empty($userData['email'])) {
+                $query->where('email', $userData['email']);
+            }
+            if (!empty($userData['telephone'])) {
+                $query->orWhere('telephone', $userData['telephone']);
+            }
+        })->first();
 
         if (!$user) {
             $role = Role::where('role', 'user')->first();
@@ -241,7 +249,7 @@ class UserAuthController extends Controller
             $user = User::create([
                 'nom' => $userData['nom'] ?? '',
                 'prenom' => $userData['prenom'] ?? '',
-                'email' => $userData['email'],
+                'email' => $userData['email'] ?? null,
                 'telephone' => $userData['telephone'] ?? null,
                 'password' => Hash::make($request->password),
                 'role_id' => $role->id,

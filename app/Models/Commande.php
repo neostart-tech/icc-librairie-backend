@@ -9,7 +9,19 @@ class Commande extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['reference', 'prix_total', 'statut', 'user_id'];
+    protected $fillable = [
+        'reference', 
+        'prix_total', 
+        'type_livraison',
+        'adresse_livraison',
+        'numero_livraison',
+        'frais_livraison',
+        'statut', 
+        'user_id',
+        'preuve_paiement',
+        'reference_paiement_client',
+        'motif_refus_paiement'
+    ];
 
     public function user()
     {

@@ -53,6 +53,8 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'client_url' => env('CLIENT_URL', 'http://localhost:3000'),
+    'dashboard_url' => env('DASHBOARD_URL', 'http://localhost:3001'),
 
     /*
     |--------------------------------------------------------------------------

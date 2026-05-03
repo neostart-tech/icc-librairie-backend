@@ -76,7 +76,7 @@ class PaiementController extends Controller
             $commande = $paiement->commande;
             $commande->update(['statut' => 'termine']);
 
-            // Envoyer notification à l’utilisateur
+            // Envoyer notification au client (Mail + Database)
             try {
                 $commande->user->notify(new CommandeTermineeNotification($commande));
             } catch (\Exception $e) {
@@ -85,15 +85,10 @@ class PaiementController extends Controller
 
             // Décrémentation stock
             foreach ($commande->detailcommandes as $detail) {
-
                 $stock = $detail->livre->stock;
-
                 if ($stock->quantite < $detail->quantite) {
-                    throw new \Exception(
-                        "Stock insuffisant pour {$detail->livre->titre}"
-                    );
+                    throw new \Exception("Stock insuffisant pour {$detail->livre->titre}");
                 }
-
                 $stock->decrement('quantite', $detail->quantite);
 
                 // Notifications stock
@@ -102,43 +97,26 @@ class PaiementController extends Controller
 
                 if ($stockRestant === 0) {
                     try {
-                        Notification::send(
-                            $admins,
-                            new StockEpuiseNotification($detail->livre)
-                        );
+                        Notification::send($admins, new StockEpuiseNotification($detail->livre));
                     } catch (\Exception $e) {
                         \Log::error("Erreur notification stock épuisé", ['error' => $e->getMessage()]);
                     }
                 } elseif ($stockRestant <= 3) {
                     try {
-                        Notification::send(
-                            $admins,
-                            new StockFaibleNotification($detail->livre, $stockRestant)
-                        );
+                        Notification::send($admins, new StockFaibleNotification($detail->livre, $stockRestant));
                     } catch (\Exception $e) {
                         \Log::error("Erreur notification stock faible", ['error' => $e->getMessage()]);
                     }
                 }
             }
 
-            // Notification commande terminée pour les admins
-            $admins = User::whereHas('role', function ($q) {
-                $q->whereIn('role', ['admin', 'superadmin']);
-            })->with('role')->get();
-
-            \Log::info("Envoi notification admin", [
-                'count' => $admins->count(),
-                'emails' => $admins->pluck('email')->toArray()
-            ]);
-            
+            // Notification aux admins (Mail + Database)
+            $admins = User::admins();
             if ($admins->isNotEmpty()) {
                 try {
-                    Notification::send(
-                        $admins,
-                        new NouvelleCommandeNotification($commande)
-                    );
+                    Notification::send($admins, new CommandeTermineeNotification($commande));
                 } catch (\Exception $e) {
-                    \Log::error("Erreur notification admin nouvelle commande", ['error' => $e->getMessage()]);
+                    \Log::error("Erreur notification admin paiement reçu", ['error' => $e->getMessage()]);
                 }
             }
         });

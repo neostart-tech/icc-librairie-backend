@@ -25,6 +25,7 @@ class CommandeResource extends JsonResource
             'statut' => $this->statut,
             'preuve_paiement' => $this->preuve_paiement,
             'reference_paiement_client' => $this->reference_paiement_client,
+            'motif_refus_paiement' => $this->motif_refus_paiement,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

@@ -19,7 +19,8 @@ class Commande extends Model
         'statut', 
         'user_id',
         'preuve_paiement',
-        'reference_paiement_client'
+        'reference_paiement_client',
+        'motif_refus_paiement'
     ];
 
     public function user()

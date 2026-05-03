@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @vite('resources/css/app.css')
     <title>{{ $title ?? 'ICC Librairie' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,7 +29,9 @@
         }
         .header img {
             max-width: 120px;
-            margin-bottom: 20px;
+            margin: 0 auto 20px auto;
+            display: block;
+            filter: brightness(0) invert(1);
         }
         .header h1 {
             color: #ffffff;
@@ -97,9 +100,8 @@
     <div class="container">
         <div class="header">
             @if(file_exists(public_path('logo-icc.jpg')))
-                <img src="{{ $message->embed(public_path('logo-icc.jpg')) }}" class="brightness-0 invert" alt="Logo ICC">
+                <img src="{{ $message->embed(public_path('logo-icc.jpg')) }}" style="display: block; margin: 0 auto 20px auto; filter: brightness(0) invert(1);" alt="Logo ICC">
             @endif
-            <h1>{{ $headerTitle ?? 'ICC Librairie' }}</h1>
         </div>
         
         <div class="content">

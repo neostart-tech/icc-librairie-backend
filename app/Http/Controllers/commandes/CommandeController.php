@@ -285,7 +285,10 @@ class CommandeController extends Controller
     {
         $request->validate(['motif' => 'required|string']);
 
-        $commande->update(['statut' => 'paiement_refuse']);
+        $commande->update([
+            'statut' => 'paiement_refuse',
+            'motif_refus_paiement' => $request->motif
+        ]);
 
         // Notifications
         try {

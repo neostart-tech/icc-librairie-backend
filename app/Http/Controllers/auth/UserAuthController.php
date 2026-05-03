@@ -44,12 +44,12 @@ class UserAuthController extends Controller
             'role_id' => $role->id,
         ]);
 
-        // Envoyer email de verification
-        // event(new Registered($user));
+        $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
             'message' => 'Utilisateur créé avec succès.',
-            'user' => new UserResource($user),
+            'token' => $token,
+            'user' => new UserResource($user->load(['role', 'commandes'])),
         ]);
     }
 

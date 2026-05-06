@@ -192,6 +192,11 @@ class UserAuthController extends Controller
                     'password' => $request->password,
                 ]);
 
+            \Log::info('SSO Response Debug', [
+                'status' => $response->status(),
+                'response' => $response->json(),
+                'body_preview' => substr($response->body(), 0, 500),
+            ]);
         } catch (\Throwable $e) {
             // API distante inaccessible (DNS, SSL, timeout, etc.)
             \Log::error('SSO ICC unreachable', [
@@ -265,5 +270,4 @@ class UserAuthController extends Controller
             'user' => new UserResource($user->load(['role', 'commandes'])),
         ]);
     }
-
 }

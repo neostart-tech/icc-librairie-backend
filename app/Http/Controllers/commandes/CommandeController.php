@@ -19,6 +19,7 @@ use App\Mail\PaymentDeclaredMail;
 use App\Mail\NewPaymentAdminMail;
 use App\Mail\PaymentValidatedMail;
 use App\Mail\PaymentRefusedMail;
+use App\Mail\VenteComptoirMail;
 use App\Notifications\PaymentValidatedNotification;
 use App\Notifications\PaymentDeclaredNotification;
 use App\Notifications\PaymentRefusedNotification;
@@ -369,10 +370,30 @@ class CommandeController extends Controller
             ]);
         });
 
+        // Envoi du mail de reçu
+        $this->sendVenteComptoirMail($commande);
+
         return response()->json([
             'success' => true,
             'message' => 'Vente au comptoir enregistrée avec succès',
             'data' => $commande->load('detailcommandes.livre')
         ], 201);
+    }
+
+    /**
+     * Envoyer le reçu par mail pour une vente au comptoir
+     */
+    private function sendVenteComptoirMail(Commande $commande)
+    {
+        if ($commande->email_client) {
+            try {
+                Mail::to($commande->email_client)->send(new VenteComptoirMail($commande));
+            } catch (\Exception $e) {
+                logger()->error('Erreur envoi mail vente comptoir', [
+                    'commande' => $commande->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 }

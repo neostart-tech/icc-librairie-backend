@@ -10,6 +10,7 @@ use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\auteurs\AuteurController;
 
 use App\Http\Controllers\banners\BannerController;
+use App\Http\Controllers\devis\DevisController;
 use App\Http\Controllers\popups\PopupController;
 use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
@@ -77,6 +78,9 @@ Route::get('/banners/actives', [BannerController::class, 'actives']);
 // Popups (Public)
 Route::get('/popups/active', [PopupController::class, 'active']);
 
+
+// Devis (demande de devis publique)
+Route::post('/devis', [DevisController::class, 'store']);
 
 // Routes nécessitant une authentification
 Route::middleware('auth:sanctum')->group(function () {
@@ -213,6 +217,13 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->noContent();
         });
     })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Devis (admin)
+    Route::prefix('/devis')->middleware(IsAdminOrSuperAdmin::class)->group(function () {
+        Route::get('/', [DevisController::class, 'index']);
+        Route::get('/{devis}', [DevisController::class, 'show']);
+        Route::put('/{devis}/statut', [DevisController::class, 'updateStatut']);
+    });
 
     //Settings
     Route::prefix('/settings')->group(function () {

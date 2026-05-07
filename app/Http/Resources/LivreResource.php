@@ -28,6 +28,7 @@ class LivreResource extends JsonResource
             'is_selection_annee' => (bool)$this->is_selection_annee,
             'is_livre_du_mois' => (bool)$this->is_livre_du_mois,
             'is_livre_duo' => (bool)$this->is_livre_duo,
+            'sur_commande' => (bool)$this->sur_commande,
             'image' => $this->image,
 
             'categorie' => new CategorieResource($this->whenLoaded('categorie')),

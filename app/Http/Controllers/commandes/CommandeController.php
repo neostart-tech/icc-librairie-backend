@@ -120,10 +120,8 @@ class CommandeController extends Controller
                 ];
             }
 
+            // Frais de livraison toujours à 0 : pris en charge par le client à la livraison
             $frais_livraison = 0;
-            if ($request->type_livraison === 'livraison') {
-                $frais_livraison = (int) \App\Models\Setting::get('delivery_fee', 0);
-            }
 
             // Création commande
             $commande = Commande::create([

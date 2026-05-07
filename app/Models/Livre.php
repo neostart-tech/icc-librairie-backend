@@ -10,18 +10,26 @@ class Livre extends Model
     use HasUuid;
 
     protected $fillable = [
-        'titre', 
-        'auteur', 
-        'id_auteur', 
+        'titre',
+        'auteur',
+        'id_auteur',
         'image',
-        'description', 
-        'prix', 
-        'prix_promo', 
+        'description',
+        'prix',
+        'prix_promo',
+        'sur_commande',
         'categorie_id',
         'is_selection_annee',
         'is_livre_du_mois',
         'is_livre_duo',
         'featured_order'
+    ];
+
+    protected $casts = [
+        'sur_commande' => 'boolean',
+        'is_selection_annee' => 'boolean',
+        'is_livre_du_mois' => 'boolean',
+        'is_livre_duo' => 'boolean',
     ];
 
     public function categorie()

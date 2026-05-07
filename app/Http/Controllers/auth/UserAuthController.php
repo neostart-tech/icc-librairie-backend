@@ -185,12 +185,17 @@ class UserAuthController extends Controller
         }
 
         try {
+            $payload = [
+                'email' => $request->email,
+                'password' => $request->password,
+                'api_key' => config('services.icc.api_key'),
+            ];
+
+            \Log::info('SSO Request Payload Debug', $payload);
+
             $response = Http::timeout(5)
                 ->acceptJson()
-                ->post(config('services.icc.url'), [
-                    'email' => $request->email,
-                    'password' => $request->password,
-                ]);
+                ->post(config('services.icc.url'), $payload);
 
             \Log::info('SSO Response Debug', [
                 'status' => $response->status(),

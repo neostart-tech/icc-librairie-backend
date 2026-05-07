@@ -53,6 +53,7 @@ Route::get('/livres/{livre}', [LivreController::class, 'show']);
 
 // Stocks
 Route::get('/stocks', [StockController::class, 'index']);
+Route::get('/stocks/mouvements', [StockController::class, 'allMouvements'])->middleware(['auth:sanctum', IsAdminOrSuperAdmin::class]);
 Route::get('/stocks/{livre}', [StockController::class, 'show']);
 
 // Auteurs
@@ -82,7 +83,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Categories
     Route::prefix('/categories')->group(function () {
-        Route::post('/reorder', [CategorieController::class, 'reorder']);
         Route::post('/', [CategorieController::class, 'store']);
         Route::put('/{categorie}', [CategorieController::class, 'update']);
         Route::delete('/{categorie}', [CategorieController::class, 'destroy']);
@@ -126,7 +126,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestion du stock
     Route::prefix('/stocks')->group(function () {
-        Route::get('/mouvements/all', [StockController::class, 'allMouvements']);
         Route::post('/mouvement', [StockController::class, 'store']);
         Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
     })->middleware(IsAdminOrSuperAdmin::class);

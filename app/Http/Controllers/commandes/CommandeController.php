@@ -147,27 +147,6 @@ class CommandeController extends Controller
                     'prix_unitaire' => $ligne['prix'],
                 ]);
             }
-
-            /* COMMENTED OUT SEMOA INTEGRATION
-            $paiement = Paiement::create([
-                'id' => Str::uuid(),
-                'commande_id' => $commande->id,
-                'moyen_paiement' => $request->gateway_id,
-                'reference_transaction' => 'TMP-' . uniqid(),
-                'montant' => $total + $frais_livraison,
-                'statut' => 'pending',
-            ]);
-
-            try {
-                $cashpay = app(CashPayService::class);
-                $result = $cashpay->createOrder($total + $frais_livraison, $request->phone, $request->gateway_id);
-                $paiement->update(['reference_transaction' => $result['order_reference']]);
-                $paymentUrl = $result['bill_url'];
-            } catch (\Throwable $e) {
-                logger()->error('Erreur Semoa', ['message' => $e->getMessage()]);
-                throw new \Exception("Erreur lors de l'initialisation du paiement");
-            }
-            */
         });
 
         // Envoyer mail de confirmation de demande
@@ -244,8 +223,6 @@ class CommandeController extends Controller
                     throw new \Exception("Stock insuffisant pour {$detail->livre->titre}");
                 }
                 $stock->decrement('quantite', $detail->quantite);
-                
-                // On peut ajouter ici les notifications de stock faible/épuisé
             }
 
             // Créer l'entrée dans la table paiements
@@ -337,6 +314,9 @@ class CommandeController extends Controller
             'livres' => 'required|array|min:1',
             'livres.*.livre_id' => 'required|uuid|exists:livres,id',
             'livres.*.quantite' => 'required|integer|min:1',
+            'nom_client' => 'required|string',
+            'telephone_client' => 'nullable|string',
+            'email_client' => 'nullable|email',
             'user_id' => 'nullable|uuid|exists:users,id',
         ]);
 
@@ -362,7 +342,10 @@ class CommandeController extends Controller
                 'prix_total' => $total,
                 'type_livraison' => 'retrait',
                 'statut' => 'traite',
-                'user_id' => $request->user_id ?? auth()->id(), // On peut associer à un client existant ou à l'admin
+                'user_id' => $request->user_id, // Nullable
+                'nom_client' => $request->nom_client,
+                'telephone_client' => $request->telephone_client,
+                'email_client' => $request->email_client,
             ]);
 
             foreach ($lignes as $ligne) {
@@ -392,6 +375,4 @@ class CommandeController extends Controller
             'data' => $commande->load('detailcommandes.livre')
         ], 201);
     }
-
-
 }

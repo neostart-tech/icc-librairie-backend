@@ -10,6 +10,7 @@ use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\auteurs\AuteurController;
 
 use App\Http\Controllers\banners\BannerController;
+use App\Http\Controllers\devis\DevisController;
 use App\Http\Controllers\popups\PopupController;
 use App\Http\Controllers\Paiements\PaiementController;
 use App\Http\Controllers\profil\ProfilController;
@@ -53,6 +54,7 @@ Route::get('/livres/{livre}', [LivreController::class, 'show']);
 
 // Stocks
 Route::get('/stocks', [StockController::class, 'index']);
+Route::get('/stocks/mouvements', [StockController::class, 'allMouvements'])->middleware(['auth:sanctum', IsAdminOrSuperAdmin::class]);
 Route::get('/stocks/{livre}', [StockController::class, 'show']);
 
 // Auteurs
@@ -77,12 +79,14 @@ Route::get('/banners/actives', [BannerController::class, 'actives']);
 Route::get('/popups/active', [PopupController::class, 'active']);
 
 
+// Devis (demande de devis publique)
+Route::post('/devis', [DevisController::class, 'store']);
+
 // Routes nécessitant une authentification
 Route::middleware('auth:sanctum')->group(function () {
 
     // Categories
     Route::prefix('/categories')->group(function () {
-        Route::post('/reorder', [CategorieController::class, 'reorder']);
         Route::post('/', [CategorieController::class, 'store']);
         Route::put('/{categorie}', [CategorieController::class, 'update']);
         Route::delete('/{categorie}', [CategorieController::class, 'destroy']);
@@ -126,7 +130,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestion du stock
     Route::prefix('/stocks')->group(function () {
-        Route::get('/mouvements/all', [StockController::class, 'allMouvements']);
         Route::post('/mouvement', [StockController::class, 'store']);
         Route::get('/{livre}/mouvements', [StockController::class, 'mouvements']);
     })->middleware(IsAdminOrSuperAdmin::class);
@@ -214,6 +217,13 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->noContent();
         });
     })->middleware(IsAdminOrSuperAdmin::class);
+
+    // Devis (admin)
+    Route::prefix('/devis')->middleware(IsAdminOrSuperAdmin::class)->group(function () {
+        Route::get('/', [DevisController::class, 'index']);
+        Route::get('/{devis}', [DevisController::class, 'show']);
+        Route::put('/{devis}/statut', [DevisController::class, 'updateStatut']);
+    });
 
     //Settings
     Route::prefix('/settings')->group(function () {

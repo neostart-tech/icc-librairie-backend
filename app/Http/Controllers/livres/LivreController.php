@@ -45,15 +45,18 @@ class LivreController extends Controller
     {
         \Log::info($request->all());
 
+        $surCommande = $request->boolean('sur_commande');
+
         $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'prix' => 'required|numeric|min:0',
+            'prix' => $surCommande ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
             'image' => 'nullable|image|max:4096',
+            'sur_commande' => 'nullable|boolean',
             'is_selection_annee' => 'nullable|boolean',
             'is_livre_du_mois' => 'nullable|boolean',
             'is_livre_duo' => 'nullable|boolean',
@@ -64,8 +67,9 @@ class LivreController extends Controller
             'titre' => $request->titre,
             'auteur' => $request->auteur,
             'description' => $request->description,
-            'prix' => $request->prix,
-            'prix_promo' => $request->prix_promo,
+            'prix' => $surCommande ? null : $request->prix,
+            'prix_promo' => $surCommande ? null : $request->prix_promo,
+            'sur_commande' => $surCommande,
             'categorie_id' => $request->categorie_id,
             'id_auteur' => $request->id_auteur,
             'is_selection_annee' => $request->boolean('is_selection_annee'),
@@ -108,15 +112,20 @@ class LivreController extends Controller
     {
         \Log::info($request->all());
 
+        $surCommande = $request->has('sur_commande')
+            ? $request->boolean('sur_commande')
+            : (bool) $livre->sur_commande;
+
         $request->validate([
             'titre' => 'sometimes|required|string|max:255',
             'auteur' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'prix' => 'sometimes|required|numeric|min:0',
+            'prix' => $surCommande ? 'nullable|numeric|min:0' : 'sometimes|required|numeric|min:0',
             'prix_promo' => 'nullable|numeric|min:0',
             'categorie_id' => 'sometimes|required|exists:categories,id',
             'id_auteur' => 'nullable|exists:auteurs,id',
             'image' => 'nullable|image|max:4096',
+            'sur_commande' => 'nullable|boolean',
             'is_selection_annee' => 'nullable|boolean',
             'is_livre_du_mois' => 'nullable|boolean',
             'is_livre_duo' => 'nullable|boolean',
@@ -135,12 +144,18 @@ class LivreController extends Controller
             'titre',
             'auteur',
             'description',
-            'prix',
-            'prix_promo',
             'categorie_id',
             'id_auteur',
-            'image',
         ]);
+
+        if ($request->has('sur_commande')) {
+            $livreData['sur_commande'] = $surCommande;
+            $livreData['prix'] = $surCommande ? null : $request->prix;
+            $livreData['prix_promo'] = $surCommande ? null : $request->prix_promo;
+        } else {
+            if ($request->has('prix')) $livreData['prix'] = $request->prix;
+            if ($request->has('prix_promo')) $livreData['prix_promo'] = $request->prix_promo;
+        }
 
         if ($request->has('is_selection_annee')) $livreData['is_selection_annee'] = $request->boolean('is_selection_annee');
         if ($request->has('is_livre_du_mois')) $livreData['is_livre_du_mois'] = $request->boolean('is_livre_du_mois');

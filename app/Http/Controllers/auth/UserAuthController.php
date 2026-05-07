@@ -185,13 +185,23 @@ class UserAuthController extends Controller
         }
 
         try {
+            $payload = [
+                'email' => $request->email,
+                'password' => $request->password,
+                'api_key' => config('services.icc.api_key'),
+            ];
+
+            \Log::info('SSO Request Payload Debug', $payload);
+
             $response = Http::timeout(5)
                 ->acceptJson()
-                ->post(config('services.icc.url'), [
-                    'email' => $request->email,
-                    'password' => $request->password,
-                ]);
+                ->post(config('services.icc.url'), $payload);
 
+            \Log::info('SSO Response Debug', [
+                'status' => $response->status(),
+                'response' => $response->json(),
+                'body_preview' => substr($response->body(), 0, 500),
+            ]);
         } catch (\Throwable $e) {
             // API distante inaccessible (DNS, SSL, timeout, etc.)
             \Log::error('SSO ICC unreachable', [
@@ -265,5 +275,4 @@ class UserAuthController extends Controller
             'user' => new UserResource($user->load(['role', 'commandes'])),
         ]);
     }
-
 }

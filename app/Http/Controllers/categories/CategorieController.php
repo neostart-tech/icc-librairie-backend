@@ -15,7 +15,7 @@ class CategorieController extends Controller
      */
     public function index()
     {
-        $categories = Categorie::orderBy('order', 'asc')->get();
+        $categories = Categorie::latest()->get();
         return CategorieResource::collection($categories);
     }
 
@@ -29,7 +29,6 @@ class CategorieController extends Controller
         $validator = Validator::make($request->all(), [
             'libelle' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'order' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -62,7 +61,6 @@ class CategorieController extends Controller
         $data = $request->validate([
             'libelle' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'order' => 'nullable|integer',
         ]);
 
         $categorie->update($data);
@@ -87,23 +85,4 @@ class CategorieController extends Controller
         ]);
     }
 
-    /**
-     * Mettre à jour l'ordre des catégories
-     */
-    public function reorder(Request $request)
-    {
-        $request->validate([
-            'orders' => 'required|array',
-            'orders.*.id' => 'required|exists:categories,id',
-            'orders.*.order' => 'required|integer',
-        ]);
-
-        foreach ($request->orders as $order) {
-            Categorie::where('id', $order['id'])->update(['order' => $order['order']]);
-        }
-
-        return response()->json([
-            'message' => 'Ordre des catégories mis à jour'
-        ]);
-    }
 }

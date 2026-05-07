@@ -131,7 +131,7 @@ class StockController extends Controller
 
     public function allMouvements()
     {
-        $mouvements = StockMouvement::with('livre.images')->get();
+        $mouvements = StockMouvement::with('livre')->get();
         return response()->json($mouvements);
     }
 }

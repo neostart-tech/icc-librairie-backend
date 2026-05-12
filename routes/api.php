@@ -227,9 +227,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Settings
     Route::prefix('/settings')->group(function () {
-        Route::get('/', function() {
-            return response()->json(\App\Models\Setting::all()->pluck('value', 'key'));
-        });
         Route::post('/', function(Illuminate\Http\Request $request) {
             foreach($request->all() as $key => $value) {
                 \App\Models\Setting::set($key, $value);
@@ -238,4 +235,8 @@ Route::middleware('auth:sanctum')->group(function () {
         })->middleware(IsAdminOrSuperAdmin::class);
     });
 
+});
+
+Route::get('/settings', function() {
+    return response()->json(\App\Models\Setting::all()->pluck('value', 'key'));
 });

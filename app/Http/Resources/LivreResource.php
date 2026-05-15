@@ -35,6 +35,8 @@ class LivreResource extends JsonResource
             'auteurRel' => new AuteurResource($this->whenLoaded('auteurRel')),
             'stock' => new StockResource($this->whenLoaded('stock')),
             'stockMouvements' => StockMouvementResource::collection($this->whenLoaded('stockMouvements')),
+            'average_rating' => $this->average_rating,
+            'notes_count' => $this->notes_count,
         ];
     }
 }

@@ -44,7 +44,7 @@ class StockEpuiseNotification extends Notification
         return [
             'type' => 'stock_epuise',
             'titre' => 'Stock épuisé',
-            'message' => "Le livre '{$this->livre->titre}' est en rupture de stock",
+            'message' => "Le livre '{$this->livre->titre}' est en stock épuisé",
             'livre_id' => $this->livre->id,
         ];
     }

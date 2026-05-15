@@ -8,6 +8,7 @@ use App\Http\Controllers\commandes\CommandeController;
 use App\Http\Controllers\gateways\GatewayController;
 use App\Http\Controllers\livres\LivreController;
 use App\Http\Controllers\auteurs\AuteurController;
+use App\Http\Controllers\notes\NoteController;
 
 use App\Http\Controllers\banners\BannerController;
 use App\Http\Controllers\devis\DevisController;
@@ -51,6 +52,7 @@ Route::get('/categories/{categorie}', [CategorieController::class, 'show']);
 Route::get('/livres', [LivreController::class, 'index']);
 Route::get('/livres/featured', [LivreController::class, 'getFeatured']);
 Route::get('/livres/{livre}', [LivreController::class, 'show']);
+Route::get('/livres/{livre}/notes', [NoteController::class, 'index']);
 
 // Stocks
 Route::get('/stocks', [StockController::class, 'index']);
@@ -233,6 +235,13 @@ Route::middleware('auth:sanctum')->group(function () {
             }
             return response()->json(['message' => 'Settings updated']);
         })->middleware(IsAdminOrSuperAdmin::class);
+    });
+
+    // Notes
+    Route::prefix('/notes')->group(function () {
+        Route::post('/', [NoteController::class, 'store']);
+        Route::get('/all', [NoteController::class, 'allNotes'])->middleware(IsAdminOrSuperAdmin::class);
+        Route::delete('/{note}', [NoteController::class, 'destroy'])->middleware(IsAdminOrSuperAdmin::class);
     });
 
 });

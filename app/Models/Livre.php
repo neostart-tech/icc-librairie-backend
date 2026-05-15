@@ -25,6 +25,8 @@ class Livre extends Model
         'featured_order'
     ];
 
+    protected $appends = ['average_rating', 'notes_count'];
+
     protected $casts = [
         'sur_commande' => 'boolean',
         'is_selection_annee' => 'boolean',
@@ -57,8 +59,18 @@ class Livre extends Model
         return $this->hasMany(DetailCommande::class);
     }
 
-    public function images()
+    public function notes()
     {
-        return $this->hasMany(Image::class);
+        return $this->hasMany(Note::class, 'id_livre');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->notes()->avg('note') ?? 0, 1);
+    }
+
+    public function getNotesCountAttribute()
+    {
+        return $this->notes()->count();
     }
 }

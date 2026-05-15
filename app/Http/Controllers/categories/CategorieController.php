@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Categorie;
 use App\Http\Resources\CategorieResource;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CategorieController extends Controller
 {
@@ -77,12 +79,38 @@ class CategorieController extends Controller
      */
     public function destroy(Categorie $categorie)
     {
+        try {
+            DB::beginTransaction();
 
-        $categorie->delete();
+            foreach ($categorie->livres as $livre) {
+                // Supprimer l'image physique
+                if ($livre->image) {
+                    Storage::disk('public')->delete($livre->image);
+                }
 
-        return response()->json([
-            'message' => 'Catégorie supprimée avec succès'
-        ]);
+                // Supprimer les dépendances du livre
+                $livre->stock()->delete();
+                $livre->stockMouvements()->delete();
+                $livre->detailCommandes()->delete();
+                $livre->notes()->delete(); // On supprime aussi les notes pour être sûr
+                
+                $livre->delete();
+            }
+
+            $categorie->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Catégorie et livres associés supprimés avec succès'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la suppression de la catégorie',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }

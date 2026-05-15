@@ -59,11 +59,6 @@ class Livre extends Model
         return $this->hasMany(DetailCommande::class);
     }
 
-    public function images()
-    {
-        return $this->hasMany(Image::class);
-    }
-
     public function notes()
     {
         return $this->hasMany(Note::class, 'id_livre');
